@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>夜夜烤-后台管理</title>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyD_OVg4lIPoqCICZxDttngMWhd0nwIfTQE",
+            authDomain: "yeyekaomenu.firebaseapp.com",
+            projectId: "yeyekaomenu",
+            storageBucket: "yeyekaomenu.firebasestorage.app",
+            messagingSenderId: "158971440613",
+            appId: "1:158971440613:web:377f5c3fd78120bc27130c"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const menuCol = collection(db, "menu");
+
+        // 上架新菜
+        window.addFood = async () => {
+            const name = document.getElementById('name').value;
+            const price = Number(document.getElementById('price').value);
+            const img = document.getElementById('img').value;
+            const tag = document.getElementById('tag').value;
+            if(!name || !price) return alert("请填写名字和价格");
+            await addDoc(menuCol, { name, price, img, tag, time: Date.now() });
+            location.reload();
+        };
+
+        // 加载现有菜单
+        const querySnapshot = await getDocs(menuCol);
+        const listDiv = document.getElementById('list');
+        querySnapshot.forEach((docSnap) => {
+            const data = docSnap.data();
+            const item = document.createElement('div');
+            item.innerHTML = `
+                <div style="border:1px solid #ccc; padding:10px; margin:5px;">
+                    <b>${data.name}</b> - ${data.price} MMK 
+                    <button onclick="deleteItem('${docSnap.id}')">删除</button>
+                </div>
+            `;
+            listDiv.appendChild(item);
+        });
+
+        window.deleteItem = async (id) => {
+            if(confirm("确定删除吗？")) {
+                await deleteDoc(doc(db, "menu", id));
+                location.reload();
+            }
+        };
+    </script>
+    <style>
+        body { font-family: sans-serif; padding: 20px; line-height: 1.6; }
+        input { display: block; margin-bottom: 10px; padding: 8px; width: 100%; max-width: 300px; }
+        button { padding: 10px 20px; background: #ff4757; color: white; border: none; border-radius: 5px; }
+    </style>
+</head>
+<body>
+    <h2>🔥 夜夜烤后台管理</h2>
+    <input type="text" id="name" placeholder="菜名 (如: 烤羊肉串)">
+    <input type="number" id="price" placeholder="价格 (数字，如: 1500)">
+    <input type="text" id="img" placeholder="图片链接 (来自图床)">
+    <input type="text" id="tag" placeholder="标签 (如: 招牌, 爆款, 可不填)">
+    <button onclick="addFood()">点击上架</button>
+    <hr>
+    <h3>当前在售清单</h3>
+    <div id="list"></div>
+</body>
+</html>
