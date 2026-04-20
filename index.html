@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+    <title>夜夜烤 - 点单</title>
+    <style>
+        :root { --main: #ff4757; }
+        body { font-family: sans-serif; background: #f8f9fa; margin: 0; padding-bottom: 100px; }
+        .banner { background: #333; color: white; padding: 20px; text-align: center; }
+        .container { padding: 10px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .card { background: white; border-radius: 12px; overflow: hidden; display: flex; flex-direction: column; box-shadow: 0 2px 5px rgba(0,0,0,0.05); position: relative; }
+        .tag { position: absolute; top: 5px; left: 5px; background: var(--main); color: white; font-size: 10px; padding: 2px 6px; border-radius: 4px; }
+        .card img { width: 100%; height: 100px; object-fit: cover; background: #eee; }
+        .card-body { padding: 10px; flex: 1; }
+        .price { color: var(--main); font-weight: bold; margin: 5px 0; }
+        .stepper { display: flex; justify-content: space-between; align-items: center; margin-top: 5px; }
+        .stepper button { width: 25px; height: 25px; border-radius: 50%; border: 1px solid #ddd; background: white; }
+        .footer { position: fixed; bottom: 0; width: 100%; background: white; border-top: 1px solid #eee; padding: 15px; display: flex; justify-content: space-between; align-items: center; box-sizing: border-box; }
+        #copyBtn { background: var(--main); color: white; border: none; padding: 10px 20px; border-radius: 20px; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="banner"><h1>夜夜烤 🍡</h1><p>点击下方按钮复制点单</p></div>
+    <div class="container" id="menu-container">正在加载菜单...</div>
+    <div class="footer">
+        <div>合计: <b id="total">0</b> MMK</div>
+        <button id="copyBtn" onclick="copyOrder()">复制订单</button>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getFirestore, collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyD_OVg4lIPoqCICZxDttngMWhd0nwIfTQE",
+            authDomain: "yeyekaomenu.firebaseapp.com",
+            projectId: "yeyekaomenu",
+            storageBucket: "yeyekaomenu.firebasestorage.app",
+            messagingSenderId: "158971440613",
+            appId: "1:158971440613:web:377f5c3fd78120bc27130c"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const container = document.getElementById('menu-container');
+
+        async function loadMenu() {
+            const q = query(collection(db, "menu"), orderBy("time", "desc"));
+            const querySnapshot = await getDocs(q);
+            container.innerHTML = "";
+            querySnapshot.forEach((doc) => {
+                const data = doc.data();
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.innerHTML = `
+                    ${data.tag ? `<div class="tag">${data.tag}</div>` : ''}
+                    <img src="${data.img || 'https://via.placeholder.com/150'}">
+                    <div class="card-body">
+                        <div style="font-weight:bold; font-size:14px;">${data.name}</div>
+                        <div class="price">${data.price.toLocaleString()} MMK</div>
+                        <div class="stepper">
+                            <button onclick="change(this, -1)">-</button>
+                            <input type="number" value="0" readonly style="width:25px; border:none; text-align:center;" class="num" data-name="${data.name}" data-price="${data.price}">
+                            <button onclick="change(this, 1)">+</button>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+        loadMenu();
+
+        window.change = (btn, delta) => {
+            const input = btn.parentElement.querySelector('input');
+            let v = parseInt(input.value) + delta;
+            input.value = v < 0 ? 0 : v;
+            let total = 0;
+            document.querySelectorAll('.num').forEach(i => total += i.value * i.dataset.price);
+            document.getElementById('total').innerText = total.toLocaleString();
+        };
+
+        window.copyOrder = () => {
+            let t = "✨ 夜夜烤订单：\n";
+            let total = 0;
+            document.querySelectorAll('.num').forEach(i => {
+                if(i.value > 0) {
+                    t += `· ${i.dataset.name} x ${i.value}\n`;
+                    total += i.value * i.dataset.price;
+                }
+            });
+            if(total == 0) return alert("请点餐");
+            t += `\n💰 总计：${total.toLocaleString()} MMK\n请确认备餐！`;
+            navigator.clipboard.writeText(t).then(() => alert("订单已复制，请粘贴发送！"));
+        };
+    </script>
+</body>
+</html>
