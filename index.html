@@ -55,7 +55,7 @@
 </div>
 
 <div class="tabs" id="tabBar"></div>
-<div class="container" id="menuBody">加载中...</div>
+<div class="container" id="menuBody">正在从云端加载菜单...</div>
 
 <div class="footer">
     <div>
@@ -97,11 +97,11 @@
     window.banners = [];
     window.cart = {};
 
-    // 实时监听云端菜单变化
     onSnapshot(doc(db, "restaurant", "data"), (docSnap) => {
         if (docSnap.exists()) {
             const data = docSnap.data();
-            window.menu = data.menu || [];
+            // 核心修正：使用 menu_data
+            window.menu = data.menu_data || [];
             window.banners = data.banners || ["https://via.placeholder.com/800x400?text=欢迎光临"];
             renderB();
             renderM();
@@ -134,9 +134,9 @@
                             <div class="c-name">${item.name}</div>
                             <div class="c-price">${item.price}</div>
                             <div class="step">
-                                <button class="btn-s" onclick="upQ(${item.id},-1)">-</button>
+                                <button class="btn-s" onclick="upQ('${item.id}',-1)">-</button>
                                 <span id="q-${item.id}">${window.cart[item.id] || 0}</span>
-                                <button class="btn-s" onclick="upQ(${item.id},1)">+</button>
+                                <button class="btn-s" onclick="upQ('${item.id}',1)">+</button>
                             </div>
                         </div>
                     </div>`;
@@ -177,9 +177,9 @@
                         <div class="o-price">Ks ${i.price * window.cart[id]}</div>
                     </div>
                     <div class="o-ctrl">
-                        <button class="btn-s" onclick="upQ(${i.id},-1); showO();">-</button>
+                        <button class="btn-s" onclick="upQ('${i.id}',-1); showO();">-</button>
                         <span>${window.cart[id]}</span>
-                        <button class="btn-s" onclick="upQ(${i.id},1); showO();">+</button>
+                        <button class="btn-s" onclick="upQ('${i.id}',1); showO();">+</button>
                     </div>
                 </div>`;
         }
