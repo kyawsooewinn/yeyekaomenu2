@@ -104,6 +104,12 @@
         .o-img { width: 50px; height: 50px; border-radius: 10px; object-fit: cover; }
         .btn-s { width: 34px; height: 34px; border-radius: 50%; border: none; background: rgba(255,255,255,0.15); color: white; font-size: 20px; display: flex; align-items: center; justify-content: center; }
         textarea#note { width:100%; padding:10px; margin:12px 0; border-radius:12px; border:none; background: #2c2c2e; color: white; font-size:16px; min-height: 60px; }
+        
+        /* 垃圾桶图标样式 */
+        .trash-btn {
+            background: transparent; border: none; color: #8e8e93; font-size: 20px; cursor: pointer; padding: 5px;
+        }
+        .trash-btn:active { color: var(--ios-orange); }
     </style>
 </head>
 <body>
@@ -123,7 +129,11 @@
 
 <div class="modal" id="mBox">
     <div class="modal-c">
-        <h2 style="text-align:center; margin-bottom:15px; font-size:18px; color: var(--ios-orange);">确认订单</h2>
+        <div style="display:flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+            <div style="width: 30px;"></div> <h2 style="font-size:18px; color: var(--ios-orange);">确认订单</h2>
+            <button class="trash-btn" onclick="clearCart()" title="清空购物车">🗑️</button>
+        </div>
+        
         <div id="oList" style="max-height: 350px; overflow-y: auto;"></div>
         <textarea id="note" placeholder="备注（如：加辣、不要蒜）"></textarea>
         <div style="display:flex; gap:10px;">
@@ -154,6 +164,7 @@
     // --- 声音反馈模块 ---
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     window.playClickSound = () => {
+        if (audioCtx.state === 'suspended') audioCtx.resume();
         const osc = audioCtx.createOscillator();
         const gain = audioCtx.createGain();
         osc.connect(gain); gain.connect(audioCtx.destination);
@@ -170,6 +181,7 @@
         if(bannerInterval) clearInterval(bannerInterval);
         bannerInterval = setInterval(() => {
             const wrap = document.getElementById('bWrap');
+            if(!wrap) return;
             const slides = wrap.children.length;
             if (slides > 1) {
                 currentIdx = (currentIdx + 1) % slides;
@@ -182,7 +194,17 @@
         if (docSnap.exists()) {
             const data = docSnap.data();
             window.menu = data.menu_data || []; window.banners = data.banners || [];
-            renderB(); renderM();
+            
+            // 读取本地存储数据
+            const localData = localStorage.getItem('yeyekao_cart');
+            if(localData) {
+                window.cart = JSON.parse(localData);
+            }
+            
+            renderB(); 
+            renderM();
+            updateGlobalUI();
+
             document.getElementById('p-bar').style.width = '100%';
             setTimeout(() => { document.getElementById('p-bar-wrap').style.display='none'; }, 500);
         }
@@ -228,18 +250,7 @@
         document.getElementById('menuBody').innerHTML = html;
     }
 
-    window.upQ = (id, d) => {
-        window.playClickSound(); // 点击时播放声音
-        window.cart[id] = Math.max(0, (window.cart[id] || 0) + d);
-        if(window.cart[id] === 0) delete window.cart[id];
-        const count = window.cart[id] || 0;
-        const qEl = document.getElementById(`q-${id}`);
-        if(qEl) qEl.innerText = count;
-        const bEl = document.getElementById(`badge-${id}`);
-        if(bEl) {
-            bEl.innerText = count;
-            count > 0 ? bEl.classList.add('show') : bEl.classList.remove('show');
-        }
+    function updateGlobalUI() {
         let totalQ = 0, totalM = 0;
         for(let k in window.cart) {
             const i = window.menu.find(x => x.id == k);
@@ -249,12 +260,42 @@
         document.getElementById('tM').innerText = totalM;
         const island = document.getElementById('islandBar');
         totalQ > 0 ? island.classList.add('active') : island.classList.remove('active');
+    }
+
+    // 清空购物车逻辑
+    window.clearCart = () => {
+        if(confirm("确定要清空购物车吗？")) {
+            window.cart = {};
+            localStorage.removeItem('yeyekao_cart');
+            renderM();
+            updateGlobalUI();
+            document.getElementById('mBox').style.display = 'none';
+        }
+    };
+
+    window.upQ = (id, d) => {
+        window.playClickSound(); 
+        window.cart[id] = Math.max(0, (window.cart[id] || 0) + d);
+        if(window.cart[id] === 0) delete window.cart[id];
+        
+        localStorage.setItem('yeyekao_cart', JSON.stringify(window.cart));
+
+        const count = window.cart[id] || 0;
+        const qEl = document.getElementById(`q-${id}`);
+        if(qEl) qEl.innerText = count;
+        const bEl = document.getElementById(`badge-${id}`);
+        if(bEl) {
+            bEl.innerText = count;
+            count > 0 ? bEl.classList.add('show') : bEl.classList.remove('show');
+        }
+        updateGlobalUI();
     };
 
     window.showO = () => {
         let html = '';
         for(let id in window.cart) {
             const i = window.menu.find(x => x.id == id);
+            if(!i) continue;
             html += `
                 <div class="o-item">
                     <img src="${i.img}" class="o-img">
@@ -269,6 +310,10 @@
                     </div>
                 </div>`;
         }
+        if(Object.keys(window.cart).length === 0) {
+            document.getElementById('mBox').style.display = 'none';
+            return;
+        }
         document.getElementById('oList').innerHTML = html;
         document.getElementById('mBox').style.display = 'block';
     };
@@ -278,11 +323,15 @@
         let total = 0;
         for(let id in window.cart) {
             const i = window.menu.find(x => x.id == id);
-            txt += `${i.name} x ${window.cart[id]} = ${i.price * window.cart[id]} Ks\n`;
-            total += i.price * window.cart[id];
+            if(i) {
+                txt += `${i.name} x ${window.cart[id]} = ${i.price * window.cart[id]} Ks\n`;
+                total += i.price * window.cart[id];
+            }
         }
         txt += `----------\n备注: ${document.getElementById('note').value || '无'}\n总计: ${total} Ks`;
-        navigator.clipboard.writeText(txt).then(() => alert("订单已复制！请发送给老板。"));
+        navigator.clipboard.writeText(txt).then(() => {
+            alert("订单已复制！请发送给老板。");
+        });
     };
 </script>
 </body>
