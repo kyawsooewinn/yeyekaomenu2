@@ -1,98 +1,203 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
-    <title>夜夜烤 - 点单</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>夜夜烤 - 在线点餐</title>
     <style>
-        :root { --main: #ff4757; }
-        body { font-family: sans-serif; background: #f8f9fa; margin: 0; padding-bottom: 100px; }
-        .banner { background: #333; color: white; padding: 20px; text-align: center; }
-        .container { padding: 10px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        .card { background: white; border-radius: 12px; overflow: hidden; display: flex; flex-direction: column; box-shadow: 0 2px 5px rgba(0,0,0,0.05); position: relative; }
-        .tag { position: absolute; top: 5px; left: 5px; background: var(--main); color: white; font-size: 10px; padding: 2px 6px; border-radius: 4px; }
-        .card img { width: 100%; height: 100px; object-fit: cover; background: #eee; }
-        .card-body { padding: 10px; flex: 1; }
-        .price { color: var(--main); font-weight: bold; margin: 5px 0; }
-        .stepper { display: flex; justify-content: space-between; align-items: center; margin-top: 5px; }
-        .stepper button { width: 25px; height: 25px; border-radius: 50%; border: 1px solid #ddd; background: white; }
-        .footer { position: fixed; bottom: 0; width: 100%; background: white; border-top: 1px solid #eee; padding: 15px; display: flex; justify-content: space-between; align-items: center; box-sizing: border-box; }
-        #copyBtn { background: var(--main); color: white; border: none; padding: 10px 20px; border-radius: 20px; font-weight: bold; }
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body { background: #fdfaf5; font-family: sans-serif; padding-bottom: 100px; }
+        .header { background: #bf3b18; color: white; padding: 15px 20px; position: sticky; top: 0; z-index: 100; display: flex; justify-content: space-between; align-items: center; }
+        .banner { width: 100%; height: 200px; overflow: hidden; position: relative; background: #eee; }
+        .b-wrap { display: flex; transition: 0.5s; height: 100%; }
+        .b-slide { min-width: 100%; height: 100%; }
+        .b-slide img { width: 100%; height: 100%; object-fit: cover; }
+        .tabs { display: flex; overflow-x: auto; background: #fff; padding: 10px; gap: 8px; position: sticky; top: 54px; z-index: 90; border-bottom: 1px solid #eee; }
+        .tabs::-webkit-scrollbar { display: none; }
+        .tab { padding: 6px 15px; background: #f0f0f0; border-radius: 20px; font-size: 13px; white-space: nowrap; }
+        .tab.active { background: #bf3b18; color: white; }
+        .container { padding: 15px; }
+        .cat-h { font-size: 18px; font-weight: bold; margin: 15px 0 10px; color: #bf3b18; border-left: 4px solid #bf3b18; padding-left: 8px; }
+        .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+        @media (min-width: 768px) {
+            .grid { grid-template-columns: repeat(5, 1fr); gap: 15px; }
+            .banner { height: 350px; }
+        }
+        .card { background: #fff; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.05); display: flex; flex-direction: column; }
+        .c-img { width: 100%; aspect-ratio: 1; object-fit: cover; }
+        .c-info { padding: 10px; flex: 1; display: flex; flex-direction: column; justify-content: space-between; }
+        .c-name { font-size: 14px; font-weight: bold; margin-bottom: 5px; height: 38px; overflow: hidden; }
+        .c-price { color: #bf3b18; font-weight: bold; font-size: 15px; }
+        .c-price::before { content: "Ks "; font-size: 11px; }
+        .step { display: flex; align-items: center; justify-content: space-between; margin-top: 8px; }
+        .btn-s { width: 26px; height: 26px; border-radius: 50%; border: none; background: #bf3b18; color: white; font-weight: bold; }
+        .footer { position: fixed; bottom: 0; width: 100%; background: #222; color: #fff; padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; z-index: 1000; }
+        .btn-go { background: #ff8844; border: none; color: white; padding: 10px 25px; border-radius: 30px; font-weight: bold; }
+        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 2000; padding: 20px; }
+        .modal-c { background: white; border-radius: 20px; padding: 20px; max-width: 500px; margin: 50px auto; color: #333; }
+        .o-item { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid #f5f5f5; }
+        .o-img { width: 45px; height: 45px; border-radius: 6px; object-fit: cover; }
+        .o-info { flex: 1; }
+        .o-name { font-size: 14px; font-weight: bold; }
+        .o-price { color: #bf3b18; font-size: 13px; margin-top: 2px; }
+        .o-ctrl { display: flex; align-items: center; gap: 10px; }
     </style>
 </head>
 <body>
-    <div class="banner"><h1>夜夜烤 🍡</h1><p>点击下方按钮复制点单</p></div>
-    <div class="container" id="menu-container">正在加载菜单...</div>
-    <div class="footer">
-        <div>合计: <b id="total">0</b> MMK</div>
-        <button id="copyBtn" onclick="copyOrder()">复制订单</button>
+
+<div class="header">
+    <h1>🔥 夜夜烤 | 在线点单</h1>
+    <button onclick="location.reload()" style="background:none; border:1px solid #fff; color:#fff; border-radius:5px; padding:2px 8px; font-size:12px;">刷新菜单</button>
+</div>
+
+<div class="banner">
+    <div class="b-wrap" id="bWrap"></div>
+</div>
+
+<div class="tabs" id="tabBar"></div>
+<div class="container" id="menuBody">加载中...</div>
+
+<div class="footer">
+    <div>
+        <div style="font-size:12px; opacity:0.8;">已选 <span id="tQ">0</span> 件</div>
+        <div style="color:#ffaa66; font-size:20px; font-weight:bold;">Ks <span id="tM">0</span></div>
     </div>
+    <button class="btn-go" onclick="showO()">去结算</button>
+</div>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+<div class="modal" id="mBox">
+    <div class="modal-c">
+        <h2 style="text-align:center; margin-bottom:15px;">确认订单</h2>
+        <div id="oList" style="max-height: 300px; overflow-y: auto; border-bottom:1px solid #eee;"></div>
+        <textarea id="note" placeholder="备注（如：特辣、不要蒜）" style="width:100%; padding:10px; margin:15px 0; border-radius:10px; border:1px solid #ddd;"></textarea>
+        <div style="display:flex; gap:10px;">
+            <button onclick="document.getElementById('mBox').style.display='none'" style="flex:1; padding:12px; border:none; background:#eee; border-radius:10px;">返回</button>
+            <button onclick="copyO()" style="flex:1; padding:12px; border:none; background:#bf3b18; color:white; border-radius:10px;">复制订单</button>
+        </div>
+    </div>
+</div>
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyD_OVg4lIPoqCICZxDttngMWhd0nwIfTQE",
-            authDomain: "yeyekaomenu.firebaseapp.com",
-            projectId: "yeyekaomenu",
-            storageBucket: "yeyekaomenu.firebasestorage.app",
-            messagingSenderId: "158971440613",
-            appId: "1:158971440613:web:377f5c3fd78120bc27130c"
-        };
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getFirestore, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-        const container = document.getElementById('menu-container');
+    const firebaseConfig = {
+        apiKey: "AIzaSyD_OVg4lIPoqCICZxDttngMWhd0nwIfTQE",
+        authDomain: "yeyekaomenu.firebaseapp.com",
+        projectId: "yeyekaomenu",
+        storageBucket: "yeyekaomenu.firebasestorage.app",
+        messagingSenderId: "158971440613",
+        appId: "1:158971440613:web:377f5c3fd78120bc27130c"
+    };
 
-        async function loadMenu() {
-            const q = query(collection(db, "menu"), orderBy("time", "desc"));
-            const querySnapshot = await getDocs(q);
-            container.innerHTML = "";
-            querySnapshot.forEach((doc) => {
-                const data = doc.data();
-                const card = document.createElement('div');
-                card.className = 'card';
-                card.innerHTML = `
-                    ${data.tag ? `<div class="tag">${data.tag}</div>` : ''}
-                    <img src="${data.img || 'https://via.placeholder.com/150'}">
-                    <div class="card-body">
-                        <div style="font-weight:bold; font-size:14px;">${data.name}</div>
-                        <div class="price">${data.price.toLocaleString()} MMK</div>
-                        <div class="stepper">
-                            <button onclick="change(this, -1)">-</button>
-                            <input type="number" value="0" readonly style="width:25px; border:none; text-align:center;" class="num" data-name="${data.name}" data-price="${data.price}">
-                            <button onclick="change(this, 1)">+</button>
-                        </div>
-                    </div>
-                `;
-                container.appendChild(card);
-            });
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    window.menu = [];
+    window.banners = [];
+    window.cart = {};
+
+    // 实时监听云端菜单变化
+    onSnapshot(doc(db, "restaurant", "data"), (docSnap) => {
+        if (docSnap.exists()) {
+            const data = docSnap.data();
+            window.menu = data.menu || [];
+            window.banners = data.banners || ["https://via.placeholder.com/800x400?text=欢迎光临"];
+            renderB();
+            renderM();
         }
-        loadMenu();
+    });
 
-        window.change = (btn, delta) => {
-            const input = btn.parentElement.querySelector('input');
-            let v = parseInt(input.value) + delta;
-            input.value = v < 0 ? 0 : v;
-            let total = 0;
-            document.querySelectorAll('.num').forEach(i => total += i.value * i.dataset.price);
-            document.getElementById('total').innerText = total.toLocaleString();
-        };
+    function renderB() {
+        document.getElementById('bWrap').innerHTML = window.banners.map(u => `<div class="b-slide"><img src="${u}"></div>`).join('');
+    }
 
-        window.copyOrder = () => {
-            let t = "✨ 夜夜烤订单：\n";
-            let total = 0;
-            document.querySelectorAll('.num').forEach(i => {
-                if(i.value > 0) {
-                    t += `· ${i.dataset.name} x ${i.value}\n`;
-                    total += i.value * i.dataset.price;
-                }
+    let cur = 0;
+    setInterval(() => {
+        if(window.banners.length <= 1) return;
+        cur = (cur + 1) % window.banners.length;
+        document.getElementById('bWrap').style.transform = `translateX(-${cur*100}%)`;
+    }, 3000);
+
+    function renderM() {
+        const cats = [...new Set(window.menu.map(i => i.category))];
+        document.getElementById('tabBar').innerHTML = cats.map(c => `<div class="tab" onclick="document.getElementById('cat-${c}').scrollIntoView({behavior:'smooth'})">${c}</div>`).join('');
+        
+        let html = '';
+        cats.forEach(c => {
+            html += `<div class="cat-h" id="cat-${c}">${c}</div><div class="grid">`;
+            window.menu.filter(i => i.category === c).forEach(item => {
+                html += `
+                    <div class="card">
+                        <img src="${item.img}" class="c-img">
+                        <div class="c-info">
+                            <div class="c-name">${item.name}</div>
+                            <div class="c-price">${item.price}</div>
+                            <div class="step">
+                                <button class="btn-s" onclick="upQ(${item.id},-1)">-</button>
+                                <span id="q-${item.id}">${window.cart[item.id] || 0}</span>
+                                <button class="btn-s" onclick="upQ(${item.id},1)">+</button>
+                            </div>
+                        </div>
+                    </div>`;
             });
-            if(total == 0) return alert("请点餐");
-            t += `\n💰 总计：${total.toLocaleString()} MMK\n请确认备餐！`;
-            navigator.clipboard.writeText(t).then(() => alert("订单已复制，请粘贴发送！"));
-        };
-    </script>
+            html += `</div>`;
+        });
+        document.getElementById('menuBody').innerHTML = html || "<p style='text-align:center;padding:50px;color:#999'>暂无菜品</p>";
+    }
+
+    window.upQ = (id, d) => {
+        window.cart[id] = Math.max(0, (window.cart[id] || 0) + d);
+        if(window.cart[id] === 0) delete window.cart[id];
+        
+        if(document.getElementById(`q-${id}`)) document.getElementById(`q-${id}`).innerText = window.cart[id] || 0;
+        
+        let totalQ = 0, totalM = 0;
+        for(let k in window.cart) {
+            const i = window.menu.find(x => x.id == k);
+            if(i) {
+                totalQ += window.cart[k]; 
+                totalM += window.cart[k] * i.price;
+            }
+        }
+        document.getElementById('tQ').innerText = totalQ;
+        document.getElementById('tM').innerText = totalM;
+    };
+
+    window.showO = () => {
+        if(Object.keys(window.cart).length === 0) return alert("请先选菜");
+        let html = '';
+        for(let id in window.cart) {
+            const i = window.menu.find(x => x.id == id);
+            html += `
+                <div class="o-item">
+                    <img src="${i.img}" class="o-img">
+                    <div class="o-info">
+                        <div class="o-name">${i.name}</div>
+                        <div class="o-price">Ks ${i.price * window.cart[id]}</div>
+                    </div>
+                    <div class="o-ctrl">
+                        <button class="btn-s" onclick="upQ(${i.id},-1); showO();">-</button>
+                        <span>${window.cart[id]}</span>
+                        <button class="btn-s" onclick="upQ(${i.id},1); showO();">+</button>
+                    </div>
+                </div>`;
+        }
+        document.getElementById('oList').innerHTML = html;
+        document.getElementById('mBox').style.display = 'block';
+    };
+
+    window.copyO = () => {
+        let txt = "🔥 夜夜烤新订单\n----------\n";
+        let total = 0;
+        for(let id in window.cart) {
+            const i = window.menu.find(x => x.id == id);
+            txt += `${i.name} x ${window.cart[id]} = ${i.price * window.cart[id]} Ks\n`;
+            total += i.price * window.cart[id];
+        }
+        txt += `----------\n备注: ${document.getElementById('note').value || '无'}\n总计: ${total} Ks`;
+        navigator.clipboard.writeText(txt).then(() => alert("订单已复制"));
+    };
+</script>
 </body>
 </html>
