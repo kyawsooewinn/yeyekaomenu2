@@ -100,7 +100,7 @@
         <div style="display:flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
             <div style="width: 30px;"></div>
             <h2 style="font-size:18px; color: var(--ios-orange);">确认订单</h2>
-            <button class="trash-btn" onclick="clearCart()" title="清空购物车">🗑️</button>
+            <button class="trash-btn" onclick="clearCart()" title="清空购物车">❌️</button>
         </div>
         <div id="oList" style="max-height: 350px; overflow-y: auto;"></div>
         <textarea id="note" placeholder="备注（如：加辣、不要蒜）"></textarea>
@@ -272,7 +272,7 @@
 
         if (navigator.share) {
             try {
-                await navigator.share({ title: '夜夜烤订单', text: txt });
+                await navigator.share({ title: '', text: txt });
             } catch (err) {
                 fallbackCopy(txt);
             }
