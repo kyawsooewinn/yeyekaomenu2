@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>夜夜烤 - 在线点餐111</title>
+    <title>夜夜烤 - 在线点餐</title>
     <style>
         :root {
             --ios-orange: #ff4500;
@@ -38,20 +38,20 @@
 
         .container { padding: 0 10px; }
 
-        /* --- 核心优化：更明显的标题样式 --- */
+        /* --- 核心优化：全宽长条标题样式 --- */
         .cat-h { 
-            font-size: 18px; 
-            font-weight: 800; 
-            margin: 30px 0 15px; 
-            padding: 8px 16px; 
-            background: linear-gradient(90deg, rgba(255,69,0,0.2) 0%, transparent 80%);
-            border-left: 5px solid var(--ios-orange); 
-            border-radius: 4px 20px 20px 4px;
-            letter-spacing: 1px;
             display: flex;
             align-items: center;
-            gap: 8px;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+            font-size: 15px; 
+            font-weight: 700; 
+            margin: 20px -10px 15px -10px; /* 负边距使其横跨屏幕两端 */
+            padding: 10px 20px; 
+            background: #1c1c1e; /* 深灰背景 */
+            color: #fff;
+            border-left: 4px solid var(--ios-orange); /* 左侧橙色装饰条 */
+            border-bottom: 0.5px solid rgba(255,255,255,0.05);
+            letter-spacing: 1px;
+            text-transform: uppercase;
         }
 
         .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
@@ -185,19 +185,10 @@
         const cats = [...new Set(window.menu.map(i => i.category))];
         document.getElementById('tabBar').innerHTML = cats.map(c => `<div class="tab" onclick="document.getElementById('cat-${c}').scrollIntoView({behavior:'smooth', block: 'start'})">${c}</div>`).join('');
         
-        // 自动匹配图标的小逻辑
-        const getIcon = (name) => {
-            if(name.includes('猪')) return '🐖';
-            if(name.includes('鸡')) return '🐓';
-            if(name.includes('牛')) return '🐂';
-            if(name.includes('海鲜') || name.includes('鱼')) return '🐟';
-            if(name.includes('饮') || name.includes('水')) return '🥤';
-            return '🍴';
-        };
-
         let html = '';
         cats.forEach(c => {
-            html += `<div class="cat-h" id="cat-${c}"><span>${getIcon(c)}</span> ${c}</div><div class="grid">`;
+            // 已移除图标，使用纯长条文字标题
+            html += `<div class="cat-h" id="cat-${c}">${c}</div><div class="grid">`;
             window.menu.filter(i => i.category === c).forEach(item => {
                 const count = window.cart[item.id] || 0;
                 html += `
@@ -219,7 +210,7 @@
         document.getElementById('menuBody').innerHTML = html;
     }
 
-    function updateGlobalUI() {
+    window.updateGlobalUI = () => {
         let totalQ = 0, totalM = 0;
         for(let k in window.cart) {
             const i = window.menu.find(x => x.id == k);
@@ -231,7 +222,7 @@
         totalQ > 0 ? island.classList.add('active') : island.classList.remove('active');
     }
 
-    window.clearCart = () => { if(confirm("确定要清空购物车吗？")) { window.cart = {}; localStorage.removeItem('yeyekao_cart'); renderM(); updateGlobalUI(); document.getElementById('mBox').style.display = 'none'; } };
+    window.clearCart = () => { if(confirm("确定要清空购物车吗？")) { window.cart = {}; localStorage.removeItem('yeyekao_cart'); renderM(); window.updateGlobalUI(); document.getElementById('mBox').style.display = 'none'; } };
 
     window.upQ = (id, d) => {
         window.playClickSound(); 
@@ -243,7 +234,7 @@
         if(qEl) qEl.innerText = count;
         const bEl = document.getElementById(`badge-${id}`);
         if(bEl) { bEl.innerText = count; count > 0 ? bEl.classList.add('show') : bEl.classList.remove('show'); }
-        updateGlobalUI();
+        window.updateGlobalUI();
     };
 
     window.showO = () => {
