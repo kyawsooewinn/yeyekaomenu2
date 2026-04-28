@@ -22,7 +22,6 @@
             color: #ffffff;
         }
 
-        /* 语言切换按钮样式 */
         .lang-switch {
             position: fixed;
             top: 15px;
@@ -146,33 +145,13 @@
     // --- 多语言配置 ---
     const i18n = {
         zh: {
-            selected: "已选",
-            items: "件",
-            confirmBtn: "确认下单",
-            modalTitle: "确认订单",
-            notePh: "备注（如：加辣、不要蒜）",
-            cancel: "取消",
-            send: "发送订单",
-            clearConfirm: "确定要清空购物车吗？",
-            orderHeader: "🔥 夜夜烤订单",
-            orderNote: "备注",
-            orderTotal: "总计",
-            copyAlert: "系统暂不支持直接分享，已为您自动复制订单内容！请去聊天窗口粘贴。",
-            errorAlert: "下单失败，请手动截图或联系老板。"
+            selected: "已选", items: "件", confirmBtn: "确认下单", modalTitle: "确认订单", notePh: "备注（如：加辣、不要蒜）", cancel: "取消", send: "发送订单", clearConfirm: "确定要清空购物车吗？", orderHeader: "🔥 夜夜烤订单", orderNote: "备注", orderTotal: "总计",
+            copyAlert: "订单内容已复制！请在弹出的面板中选择应用进行粘贴发送。",
+            errorAlert: "由于浏览器限制，请手动截图或联系商家。"
         },
         my: {
-            selected: "ရွေးချယ်ပြီး",
-            items: "ခု",
-            confirmBtn: "ORDERတင်မည်",
-            modalTitle: "ORDERစစ်ဆေးရန်",
-            notePh: "မှတ်ချက် (ဥပမာ-အစပ်လျှော့)",
-            cancel: "ပယ်ဖျက်မည်",
-            send: "ပို့မည်",
-            clearConfirm: "Order များဖျက်မှာ သေချာပါသလား?",
-            orderHeader: "🔥 Ye Ye Kao Order",
-            orderNote: "မှတ်ချက်",
-            orderTotal: "စုစုပေါင်း",
-            copyAlert: "Share လို့မရသေးပါ၊ Order များကို Copy ကူးပေးထားပါသည်။ Message တွင် Paste လုပ်ပြီး ပို့ပေးပါ။",
+            selected: "ရွေးချယ်ပြီး", items: "ခု", confirmBtn: "ORDERတင်မည်", modalTitle: "ORDERစစ်ဆေးရန်", notePh: "မှတ်ချက် (ဥပမာ-အစပ်လျှော့)", cancel: "ပယ်ဖျက်မည်", send: "ပို့မည်", clearConfirm: "Order များဖျက်မှာ သေချာပါသလား?", orderHeader: "🔥 Ye Ye Kao Order", orderNote: "မှတ်ချက်", orderTotal: "စုစုပေါင်း",
+            copyAlert: "Order ကို Copy ကူးပြီးပါပြီ။ ပေါ်လာသော App များထဲမှ တစ်ခုကိုရွေး၍ ပို့ပေးပါ။",
             errorAlert: "မအောင်မြင်ပါ၊ Screenshot ရိုက်ပြီး ဆိုင်ရှင်ကို ပို့ပေးပါ။"
         }
     };
@@ -196,7 +175,6 @@
         document.getElementById('ui-send').innerText = t.send;
     }
 
-    // --- 原有逻辑还原 ---
     window.menu = []; window.banners = []; window.cart = {};
 
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -234,7 +212,7 @@
             window.menu = data.menu_data || []; window.banners = data.banners || [];
             const localData = localStorage.getItem('yeyekao_cart');
             if(localData) window.cart = JSON.parse(localData);
-            applyLang(); // 初始化语言
+            applyLang();
             renderB(); 
             renderM();
             updateGlobalUI();
@@ -327,6 +305,7 @@
         document.getElementById('mBox').style.display = 'block';
     };
 
+    // --- 修改后的通用分享逻辑 ---
     window.copyO = async () => {
         const t = i18n[window.curLang];
         let txt = `${t.orderHeader}\n----------\n`;
@@ -340,25 +319,32 @@
         }
         txt += `----------\n${t.orderNote}: ${document.getElementById('note').value || '-'}\n${t.orderTotal}: ${total} Ks`;
 
+        // 1. 尝试复制内容到剪贴板（为了双重保险，万一分享不支持自动填入）
+        try {
+            await navigator.clipboard.writeText(txt);
+        } catch (e) {
+            console.log("Clipboard fallback");
+        }
+
+        // 2. 核心逻辑：唤起手机系统原生分享菜单
         if (navigator.share) {
             try {
-                await navigator.share({ title: '', text: txt });
+                // 弹出菜单，让用户选择 Viber, Telegram, WeChat, 短信等
+                await navigator.share({
+                    title: '夜夜烤订单',
+                    text: txt
+                });
             } catch (err) {
-                fallbackCopy(txt);
+                // 如果用户取消了分享，不报错
             }
         } else {
-            fallbackCopy(txt);
+            // 3. 如果浏览器不支持原生分享（如旧版安卓），则退回到原来的逻辑
+            const confirmGo = confirm(t.copyAlert);
+            if (confirmGo) {
+                window.location.href = "weixin://";
+            }
         }
     };
-
-    function fallbackCopy(text) {
-        const t = i18n[window.curLang];
-        navigator.clipboard.writeText(text).then(() => {
-            alert(t.copyAlert);
-        }).catch(err => {
-            alert(t.errorAlert);
-        });
-    }
 </script>
 </body>
 </html>
