@@ -318,3 +318,21 @@
             if(i) {
                 txt += `${i.name} x ${window.cart[id]} = ${i.price * window.cart[id]} Ks\n`;
                 total += i.price * window.cart[id];
+            }
+        }
+        txt += `----------\n${t.orderNote}: ${document.getElementById('note').value || '-'}\n${t.orderTotal}: ${total} Ks`;
+
+        try {
+            await navigator.clipboard.writeText(txt);
+            if(type === 'wechat') { window.location.href = "weixin://"; } 
+            else if(type === 'viber') { window.location.href = "viber://forward?text=" + encodeURIComponent(txt); } 
+            else if(type === 'telegram') { window.location.href = "tg://msg?text=" + encodeURIComponent(txt); }
+            else if(type === 'sms') { window.location.href = "sms:?body=" + encodeURIComponent(txt); }
+        } catch (err) {
+            alert(t.errorAlert);
+        }
+        closeShareSheet();
+    };
+</script>
+</body>
+</html>
