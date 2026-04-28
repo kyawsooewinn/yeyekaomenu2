@@ -53,11 +53,18 @@
         .container { padding: 0 10px; }
 
         .cat-h { 
-            display: flex; align-items: center; font-size: 15px; font-weight: 700; 
-            margin: 20px -10px 15px -10px; padding: 10px 20px; 
-            background: #1c1c1e; color: #fff;
+            display: flex;
+            align-items: center;
+            font-size: 15px; 
+            font-weight: 700; 
+            margin: 20px -10px 15px -10px;
+            padding: 10px 20px; 
+            background: #1c1c1e; 
+            color: #fff;
             border-left: 4px solid var(--ios-orange); 
             border-bottom: 0.5px solid rgba(255,255,255,0.05);
+            letter-spacing: 1px;
+            text-transform: uppercase;
         }
 
         .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
@@ -70,34 +77,36 @@
         .c-price { color: var(--ios-orange); font-weight: 700; font-size: 12px; }
         .c-control-bar { display: flex; align-items: center; justify-content: space-between; background: rgba(255,255,255,0.12); border-radius: 8px; padding: 1px; width: 100%; height: 26px; }
         .btn-act { flex: 1; height: 100%; border: none; background: transparent; color: white; font-size: 16px; font-weight: bold; display: flex; align-items: center; justify-content: center; }
-        .badge { position: absolute; top: 8px; right: 8px; background: var(--ios-orange); color: white; min-width: 28px; height: 28px; border-radius: 14px; font-size: 14px; font-weight: 900; display: flex; align-items: center; justify-content: center; z-index: 10; transform: scale(0); transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); }
+        .btn-act:active { background: rgba(255,255,255,0.2); border-radius: 6px; }
+        .badge { position: absolute; top: 8px; right: 8px; background: var(--ios-orange); color: white; min-width: 28px; height: 28px; border-radius: 14px; font-size: 14px; font-weight: 900; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(0,0,0,0.6); z-index: 10; transform: scale(0); transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); }
         .badge.show { transform: scale(1); }
-
-        .island-footer { position: fixed; bottom: calc(15px + env(safe-area-inset-bottom)); left: 50%; transform: translateX(-50%) translateY(120px); width: 90%; max-width: 400px; background: rgba(30, 30, 30, 0.85); backdrop-filter: var(--glass); -webkit-backdrop-filter: var(--glass); padding: 10px 10px 10px 22px; display: flex; justify-content: space-between; align-items: center; z-index: 1000; border-radius: 50px; border: 0.5px solid rgba(255,255,255,0.2); transition: transform 0.4s; }
+        
+        .island-footer { position: fixed; bottom: calc(15px + env(safe-area-inset-bottom)); left: 50%; transform: translateX(-50%) translateY(120px); width: 90%; max-width: 400px; background: rgba(30, 30, 30, 0.85); backdrop-filter: var(--glass); -webkit-backdrop-filter: var(--glass); padding: 10px 10px 10px 22px; display: flex; justify-content: space-between; align-items: center; z-index: 1000; border-radius: 50px; border: 0.5px solid rgba(255,255,255,0.2); transition: transform 0.4s cubic-bezier(0.19, 1, 0.22, 1); }
         .island-footer.active { transform: translateX(-50%) translateY(0); }
         .btn-go { background: var(--ios-orange); border: none; color: white; padding: 12px 24px; border-radius: 40px; font-weight: 800; font-size: 15px; }
-
-        /* 弹窗样式 */
+        
         .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); z-index: 2000; padding: 20px; }
-        .modal-c { background: #1c1c1e; border-radius: 24px; padding: 20px; max-width: 500px; margin: 20px auto; border: 0.5px solid rgba(255,255,255,0.1); position: relative; }
+        .modal-c { background: #1c1c1e; border-radius: 24px; padding: 20px; max-width: 500px; margin: 20px auto; border: 0.5px solid rgba(255,255,255,0.1); }
         .o-item { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 0.5px solid rgba(255,255,255,0.05); }
         .o-img { width: 50px; height: 50px; border-radius: 10px; object-fit: cover; }
         .btn-s { width: 34px; height: 34px; border-radius: 50%; border: none; background: rgba(255,255,255,0.15); color: white; font-size: 20px; display: flex; align-items: center; justify-content: center; }
         textarea#note { width:100%; padding:10px; margin:12px 0; border-radius:12px; border:none; background: #2c2c2e; color: white; font-size:16px; min-height: 60px; }
+        .trash-btn { background: transparent; border: none; color: #8e8e93; font-size: 20px; cursor: pointer; padding: 5px; }
+        .trash-btn:active { color: var(--ios-orange); }
 
-        /* 分享面板 */
-        .share-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-top: 20px; }
-        .share-item { display: flex; flex-direction: column; align-items: center; gap: 8px; cursor: pointer; }
-        .share-icon { width: 55px; height: 55px; border-radius: 15px; display: flex; align-items: center; justify-content: center; font-size: 28px; color: white; box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
-        .share-label { font-size: 12px; font-weight: 500; color: #8e8e93; }
-        .wechat-bg { background: linear-gradient(135deg, #07c160, #06ae56); }
-        .viber-bg { background: linear-gradient(135deg, #7360f2, #5949ad); }
-        .sms-bg { background: linear-gradient(135deg, #22c55e, #16a34a); }
+        /* 新增：分享菜单样式 */
+        .share-sheet { position: fixed; bottom: 0; left: 0; width: 100%; background: #1c1c1e; border-radius: 25px 25px 0 0; padding: 25px 20px calc(25px + env(safe-area-inset-bottom)); z-index: 3000; transform: translateY(100%); transition: transform 0.3s cubic-bezier(0.25, 0.1, 0.25, 1); box-shadow: 0 -10px 30px rgba(0,0,0,0.5); }
+        .share-sheet.show { transform: translateY(0); }
+        .share-grid { display: flex; justify-content: space-around; gap: 15px; margin-top: 20px; }
+        .share-item { display: flex; flex-direction: column; align-items: center; gap: 8px; border: none; background: transparent; color: white; width: 80px; }
+        .share-icon { width: 60px; height: 60px; border-radius: 18px; display: flex; align-items: center; justify-content: center; font-size: 30px; color: white; }
+        .share-text { font-size: 12px; font-weight: 500; }
+        .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 2900; }
     </style>
 </head>
 <body>
 
-<button class="lang-switch" onclick="window.toggleLang()" id="langBtn">Myanmar3 / 中文</button>
+<button class="lang-switch" onclick="window.toggleLang()" id="langBtn">Myanmar / 中文</button>
 
 <div id="p-bar-wrap"><div id="p-bar"></div></div>
 <div class="banner"><div class="b-wrap" id="bWrap"></div></div>
@@ -117,35 +126,41 @@
         <div style="display:flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
             <div style="width: 30px;"></div>
             <h2 style="font-size:18px; color: var(--ios-orange);" id="ui-modal-title">确认订单</h2>
-            <button onclick="clearCart()" style="background:transparent; border:none; font-size:20px;">❌️</button>
+            <button class="trash-btn" onclick="clearCart()" title="清空购物车">❌️</button>
         </div>
-        <div id="oList" style="max-height: 250px; overflow-y: auto; margin-bottom: 10px;"></div>
+        <div id="oList" style="max-height: 350px; overflow-y: auto;"></div>
         <textarea id="note" placeholder="备注（如：加辣、不要蒜）"></textarea>
-        
-        <div style="margin: 15px 0 10px 0; font-size: 14px; font-weight: 600; text-align: center; color: #8e8e93;">请选择下单方式</div>
-        
-        <div class="share-grid">
-            <div class="share-item" onclick="handleSend('wechat')">
-                <div class="share-icon wechat-bg">🧧</div>
-                <div class="share-label">微信</div>
-            </div>
-            <div class="share-item" onclick="handleSend('viber')">
-                <div class="share-icon viber-bg">🟣</div>
-                <div class="share-label">Viber</div>
-            </div>
-            <div class="share-item" onclick="handleSend('sms')">
-                <div class="share-icon sms-bg">💬</div>
-                <div class="share-label">短信</div>
-            </div>
+        <div style="display:flex; gap:10px;">
+            <button onclick="document.getElementById('mBox').style.display='none'" style="flex:1; padding:12px; border:none; background:#2c2c2e; color:#fff; border-radius:15px; font-weight:600;" id="ui-cancel">取消</button>
+            <button onclick="openShareSheet()" style="flex:1; padding:12px; border:none; background:var(--ios-orange); color:white; border-radius:15px; font-weight:600;" id="ui-send">发送订单</button>
         </div>
-
-        <button onclick="document.getElementById('mBox').style.display='none'" style="width:100%; margin-top:20px; padding:12px; border:none; background:#2c2c2e; color:#fff; border-radius:15px; font-weight:600;">取消</button>
     </div>
 </div>
 
+<div class="overlay" id="overlay" onclick="closeShareSheet()"></div>
+
+<div class="share-sheet" id="shareSheet">
+    <h3 style="text-align:center; font-size:15px; opacity:0.8;" id="ui-share-title">选择发送方式</h3>
+    <div class="share-grid">
+        <button class="share-item" onclick="handleSend('wechat')">
+            <div class="share-icon" style="background:#07C160;">💬</div>
+            <span class="share-text">微信</span>
+        </button>
+        <button class="share-item" onclick="handleSend('viber')">
+            <div class="share-icon" style="background:#7360f2;">🟣</div>
+            <span class="share-text">Viber</span>
+        </button>
+        <button class="share-item" onclick="handleSend('sms')">
+            <div class="share-icon" style="background:#2ecc71;">✉️</div>
+            <span class="share-text">短信</span>
+        </button>
+    </div>
+    <button onclick="closeShareSheet()" style="width:100%; margin-top:25px; padding:12px; border:none; background:#2c2c2e; color:white; border-radius:15px; font-weight:600;">取消</button>
+</div>
+
 <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/gstatic/firebasejs/10.7.1/firebase-app.js";
-    import { getFirestore, doc, onSnapshot } from "https://www.gstatic.com/gstatic/firebasejs/10.7.1/firebase-firestore.js";
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getFirestore, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyD_OVg4lIPoqCICZxDttngMWhd0nwIfTQE",
@@ -161,16 +176,36 @@
 
     const i18n = {
         zh: {
-            selected: "已选", items: "件", confirmBtn: "确认下单", modalTitle: "确认订单",
-            notePh: "备注（如：加辣、不要蒜）", clearConfirm: "确定要清空购物车吗？",
-            orderHeader: "🔥 夜夜烤订单", orderNote: "备注", orderTotal: "总计",
-            copyAlert: "订单已自动复制！请在微信粘贴发送给商家。", errorAlert: "发送失败，请重试。"
+            selected: "已选",
+            items: "件",
+            confirmBtn: "确认下单",
+            modalTitle: "确认订单",
+            notePh: "备注（如：加辣、不要蒜）",
+            cancel: "取消",
+            send: "发送订单",
+            clearConfirm: "确定要清空购物车吗？",
+            orderHeader: "🔥 夜夜烤订单",
+            orderNote: "备注",
+            orderTotal: "总计",
+            shareTitle: "选择发送应用",
+            copyAlert: "订单已自动复制！请去应用中粘贴发送。",
+            errorAlert: "复制失败，请尝试截图。"
         },
         my: {
-            selected: "ရွေးချယ်ပြီး", items: "ခု", confirmBtn: "ORDERတင်မည်", modalTitle: "ORDERစစ်ဆေးရန်",
-            notePh: "မှတ်ချက် (ဥပမာ-အစပ်လျှော့)", clearConfirm: "Order များဖျက်မှာ သေချาပါသလား?",
-            orderHeader: "🔥 Ye Ye Kao Order", orderNote: "မှတ်ချက်", orderTotal: "စုစုပေါင်း",
-            copyAlert: "Order ကို Copy ကူးပြီးပါပြီ။ WeChat တွင် Paste လုပ်ပေးပါ။", errorAlert: "မအောင်မြင်ပါ၊ ပြန်ကြိုးစားပါ။"
+            selected: "ရွေးချယ်ပြီး",
+            items: "ခု",
+            confirmBtn: "ORDERတင်မည်",
+            modalTitle: "ORDERစစ်ဆေးရန်",
+            notePh: "မှတ်ချက် (ဥပမာ-အစပ်လျှော့)",
+            cancel: "ပယ်ဖျက်မည်",
+            send: "ပို့မည်",
+            clearConfirm: "Order များဖျက်မှာ သေချာပါသလား?",
+            orderHeader: "🔥 Ye Ye Kao Order",
+            orderNote: "မှတ်ချက်",
+            orderTotal: "စုစုပေါင်း",
+            shareTitle: "ပို့မည့် App ကိုရွေးပါ",
+            copyAlert: "Order ကို Copy ကူးပြီးပါပြီ။ App တွင် Paste လုပ်ပေးပါ။",
+            errorAlert: "မအောင်မြင်ပါ၊ Screenshot ရိုက်ပို့ပေးပါ။"
         }
     };
 
@@ -188,10 +223,12 @@
         document.getElementById('ui-confirm-btn').innerText = t.confirmBtn;
         document.getElementById('ui-modal-title').innerText = t.modalTitle;
         document.getElementById('note').placeholder = t.notePh;
+        document.getElementById('ui-cancel').innerText = t.cancel;
+        document.getElementById('ui-send').innerText = t.send;
+        document.getElementById('ui-share-title').innerText = t.shareTitle;
     }
 
     window.menu = []; window.banners = []; window.cart = {};
-
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     window.playClickSound = () => {
         if (audioCtx.state === 'suspended') audioCtx.resume();
@@ -204,13 +241,31 @@
         osc.start(); osc.stop(audioCtx.currentTime + 0.1);
     };
 
+    let bannerInterval = null;
+    let currentIdx = 0;
+    function startAutoScroll() {
+        if(bannerInterval) clearInterval(bannerInterval);
+        bannerInterval = setInterval(() => {
+            const wrap = document.getElementById('bWrap');
+            if(!wrap) return;
+            const slides = wrap.children.length;
+            if (slides > 1) {
+                currentIdx = (currentIdx + 1) % slides;
+                const slideWidth = wrap.offsetWidth;
+                wrap.scrollTo({ left: currentIdx * slideWidth, behavior: 'smooth' });
+            }
+        }, 3000);
+    }
+
     onSnapshot(doc(db, "restaurant", "data"), (docSnap) => {
         if (docSnap.exists()) {
             const data = docSnap.data();
             window.menu = data.menu_data || []; window.banners = data.banners || [];
             const localData = localStorage.getItem('yeyekao_cart');
             if(localData) window.cart = JSON.parse(localData);
-            applyLang(); renderB(); renderM(); updateGlobalUI();
+            applyLang();
+            renderB(); renderM();
+            updateGlobalUI();
             document.getElementById('p-bar').style.width = '100%';
             setTimeout(() => { document.getElementById('p-bar-wrap').style.display='none'; }, 500);
         }
@@ -220,6 +275,8 @@
         const wrap = document.getElementById('bWrap');
         if(!window.banners.length) return;
         wrap.innerHTML = window.banners.map(u => `<div class="b-slide"><img src="${u}"></div>`).join('');
+        currentIdx = 0; wrap.scrollLeft = 0;
+        if (window.banners.length > 1) startAutoScroll();
     }
 
     function renderM() {
@@ -254,7 +311,10 @@
         window.cart[id] = Math.max(0, (window.cart[id] || 0) + d);
         if(window.cart[id] === 0) delete window.cart[id];
         localStorage.setItem('yeyekao_cart', JSON.stringify(window.cart));
-        renderM(); updateGlobalUI();
+        const count = window.cart[id] || 0;
+        const qEl = document.getElementById(`q-${id}`); if(qEl) qEl.innerText = count;
+        const bEl = document.getElementById(`badge-${id}`); if(bEl) { bEl.innerText = count; count > 0 ? bEl.classList.add('show') : bEl.classList.remove('show'); }
+        window.updateGlobalUI();
     };
 
     window.showO = () => {
@@ -270,35 +330,51 @@
     };
 
     window.clearCart = () => { 
-        if(confirm(i18n[window.curLang].clearConfirm)) { window.cart = {}; localStorage.removeItem('yeyekao_cart'); renderM(); updateGlobalUI(); document.getElementById('mBox').style.display = 'none'; } 
+        if(confirm(i18n[window.curLang].clearConfirm)) { 
+            window.cart = {}; localStorage.removeItem('yeyekao_cart'); renderM(); 
+            window.updateGlobalUI(); document.getElementById('mBox').style.display = 'none'; 
+        } 
     };
 
-    // --- 核心：发送处理逻辑 ---
-    window.handleSend = async (platform) => {
+    // --- 核心分享逻辑 ---
+    window.openShareSheet = () => {
+        document.getElementById('overlay').style.display = 'block';
+        document.getElementById('shareSheet').classList.add('show');
+    };
+
+    window.closeShareSheet = () => {
+        document.getElementById('overlay').style.display = 'none';
+        document.getElementById('shareSheet').classList.remove('show');
+    };
+
+    window.handleSend = async (type) => {
         const t = i18n[window.curLang];
         let txt = `${t.orderHeader}\n----------\n`;
         let total = 0;
         for(let id in window.cart) {
             const i = window.menu.find(x => x.id == id);
-            if(i) { txt += `${i.name} x ${window.cart[id]} = ${i.price * window.cart[id]} Ks\n`; total += i.price * window.cart[id]; }
+            if(i) {
+                txt += `${i.name} x ${window.cart[id]} = ${i.price * window.cart[id]} Ks\n`;
+                total += i.price * window.cart[id];
+            }
         }
         txt += `----------\n${t.orderNote}: ${document.getElementById('note').value || '-'}\n${t.orderTotal}: ${total} Ks`;
 
         try {
-            // 每次点击都先执行复制
             await navigator.clipboard.writeText(txt);
+            alert(t.copyAlert);
             
-            if (platform === 'wechat') {
-                alert(t.copyAlert);
+            if(type === 'wechat') {
                 window.location.href = "weixin://";
-            } else if (platform === 'viber') {
-                window.location.href = `viber://forward?text=${encodeURIComponent(txt)}`;
-            } else if (platform === 'sms') {
-                window.location.href = `sms:?body=${encodeURIComponent(txt)}`;
+            } else if(type === 'viber') {
+                window.location.href = "viber://forward?text=" + encodeURIComponent(txt);
+            } else if(type === 'sms') {
+                window.location.href = "sms:?body=" + encodeURIComponent(txt);
             }
         } catch (err) {
             alert(t.errorAlert);
         }
+        closeShareSheet();
     };
 </script>
 </body>
