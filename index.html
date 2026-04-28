@@ -95,7 +95,7 @@
 </head>
 <body>
 
-<button class="lang-switch" onclick="window.toggleLang()" id="langBtn">Myanmar1 / 中文</button>
+<button class="lang-switch" onclick="window.toggleLang()" id="langBtn">Myanmar2 / 中文</button>
 
 <div id="p-bar-wrap"><div id="p-bar"></div></div>
 <div class="banner"><div class="b-wrap" id="bWrap"></div></div>
@@ -145,13 +145,33 @@
     // --- 多语言配置 ---
     const i18n = {
         zh: {
-            selected: "已选", items: "件", confirmBtn: "确认下单", modalTitle: "确认订单", notePh: "备注（如：加辣、不要蒜）", cancel: "取消", send: "发送订单", clearConfirm: "确定要清空购物车吗？", orderHeader: "🔥 夜夜烤订单", orderNote: "备注", orderTotal: "总计",
-            copyAlert: "订单内容已复制！请在弹出的面板中选择应用进行粘贴发送。",
-            errorAlert: "由于浏览器限制，请手动截图或联系商家。"
+            selected: "已选",
+            items: "件",
+            confirmBtn: "确认下单",
+            modalTitle: "确认订单",
+            notePh: "备注（如：加辣、不要蒜）",
+            cancel: "取消",
+            send: "发送订单",
+            clearConfirm: "确定要清空购物车吗？",
+            orderHeader: "🔥 夜夜烤订单",
+            orderNote: "备注",
+            orderTotal: "总计",
+            copyAlert: "订单已自动复制！点击确定跳转微信，请手动粘贴给商家。",
+            errorAlert: "下单失败，请手动截图或联系老板。"
         },
         my: {
-            selected: "ရွေးချယ်ပြီး", items: "ခု", confirmBtn: "ORDERတင်မည်", modalTitle: "ORDERစစ်ဆေးရန်", notePh: "မှတ်ချက် (ဥပမာ-အစပ်လျှော့)", cancel: "ပယ်ဖျက်မည်", send: "ပို့မည်", clearConfirm: "Order များဖျက်မှာ သေချာပါသလား?", orderHeader: "🔥 Ye Ye Kao Order", orderNote: "မှတ်ချက်", orderTotal: "စုစုပေါင်း",
-            copyAlert: "Order ကို Copy ကူးပြီးပါပြီ။ ပေါ်လာသော App များထဲမှ တစ်ခုကိုရွေး၍ ပို့ပေးပါ။",
+            selected: "ရွေးချယ်ပြီး",
+            items: "ခု",
+            confirmBtn: "ORDERတင်မည်",
+            modalTitle: "ORDERစစ်ဆေးရန်",
+            notePh: "မှတ်ချက် (ဥပမာ-အစပ်လျှော့)",
+            cancel: "ပယ်ဖျက်မည်",
+            send: "ပို့မည်",
+            clearConfirm: "Order များဖျက်မှာ သေချာပါသလား?",
+            orderHeader: "🔥 Ye Ye Kao Order",
+            orderNote: "မှတ်ချက်",
+            orderTotal: "စုစုပေါင်း",
+            copyAlert: "Order ကို Copy ကူးပြီးပါပြီ။ OK နှိပ်ပြီး WeChat တွင် Paste လုပ်ပေးပါ။",
             errorAlert: "မအောင်မြင်ပါ၊ Screenshot ရိုက်ပြီး ဆိုင်ရှင်ကို ပို့ပေးပါ။"
         }
     };
@@ -305,7 +325,7 @@
         document.getElementById('mBox').style.display = 'block';
     };
 
-    // --- 修改后的通用分享逻辑 ---
+    // --- 修改后的核心分享函数 ---
     window.copyO = async () => {
         const t = i18n[window.curLang];
         let txt = `${t.orderHeader}\n----------\n`;
@@ -319,30 +339,20 @@
         }
         txt += `----------\n${t.orderNote}: ${document.getElementById('note').value || '-'}\n${t.orderTotal}: ${total} Ks`;
 
-        // 1. 尝试复制内容到剪贴板（为了双重保险，万一分享不支持自动填入）
         try {
+            // 1. 将订单内容写入剪贴板
             await navigator.clipboard.writeText(txt);
-        } catch (e) {
-            console.log("Clipboard fallback");
-        }
-
-        // 2. 核心逻辑：唤起手机系统原生分享菜单
-        if (navigator.share) {
-            try {
-                // 弹出菜单，让用户选择 Viber, Telegram, WeChat, 短信等
-                await navigator.share({
-                    title: '夜夜烤订单',
-                    text: txt
-                });
-            } catch (err) {
-                // 如果用户取消了分享，不报错
-            }
-        } else {
-            // 3. 如果浏览器不支持原生分享（如旧版安卓），则退回到原来的逻辑
+            
+            // 2. 弹出提示，告知用户已复制
             const confirmGo = confirm(t.copyAlert);
+            
+            // 3. 用户点击确定后，尝试唤起微信
             if (confirmGo) {
                 window.location.href = "weixin://";
             }
+        } catch (err) {
+            // 复制失败备用方案
+            alert(t.errorAlert);
         }
     };
 </script>
