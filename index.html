@@ -22,6 +22,21 @@
             color: #ffffff;
         }
 
+        /* 语言切换按钮样式 */
+        .lang-switch {
+            position: fixed;
+            top: 15px;
+            right: 15px;
+            z-index: 3100;
+            background: rgba(255, 69, 0, 0.2);
+            border: 1px solid var(--ios-orange);
+            color: white;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            backdrop-filter: blur(10px);
+        }
+
         #p-bar-wrap { position: fixed; top: 0; left: 0; width: 100%; height: 2px; z-index: 3000; }
         #p-bar { width: 0%; height: 100%; background: var(--ios-orange); transition: width 0.4s; }
 
@@ -38,17 +53,16 @@
 
         .container { padding: 0 10px; }
 
-        /* --- 核心优化：全宽长条标题样式 --- */
         .cat-h { 
             display: flex;
             align-items: center;
             font-size: 15px; 
             font-weight: 700; 
-            margin: 20px -10px 15px -10px; /* 负边距使其横跨屏幕两端 */
+            margin: 20px -10px 15px -10px;
             padding: 10px 20px; 
-            background: #1c1c1e; /* 深灰背景 */
+            background: #1c1c1e; 
             color: #fff;
-            border-left: 4px solid var(--ios-orange); /* 左侧橙色装饰条 */
+            border-left: 4px solid var(--ios-orange); 
             border-bottom: 0.5px solid rgba(255,255,255,0.05);
             letter-spacing: 1px;
             text-transform: uppercase;
@@ -58,7 +72,7 @@
         @media (min-width: 768px) { .grid { grid-template-columns: repeat(4, 1fr); } }
         .card { position: relative; aspect-ratio: 1; background: #1c1c1e; border-radius: var(--radius); overflow: hidden; border: 0.5px solid rgba(255,255,255,0.1); }
         .c-img { width: 100%; height: 100%; object-fit: cover; display: block; }
-        .c-glass-info { position: absolute; bottom: 0; left: 0; width: 100%; background: linear-gradient(to top, rgba(0,0,0,0.95) 20%, rgba(0,0,0,0.6) 80%, transparent 100%); padding: 5px 8px; display: flex; flex-direction: column; justify-content: flex-end; height: 24%; }
+        .c-glass-info { position: absolute; bottom: 0; left: 0; width: 100%; background: linear-gradient(to top, rgba(0,0,0,0.95) 20%, rgba(0,0,0,0.6) 80%, transparent 100%); padding: 5px 8px; display: flex; flex-direction: column; justify-content: flex-end; height: 28%; }
         .c-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
         .c-name { font-size: 12px; font-weight: 600; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 65%; }
         .c-price { color: var(--ios-orange); font-weight: 700; font-size: 12px; }
@@ -82,6 +96,8 @@
 </head>
 <body>
 
+<button class="lang-switch" onclick="window.toggleLang()" id="langBtn">Myanmar / 中文</button>
+
 <div id="p-bar-wrap"><div id="p-bar"></div></div>
 <div class="banner"><div class="b-wrap" id="bWrap"></div></div>
 <div class="tabs" id="tabBar"></div>
@@ -89,24 +105,24 @@
 
 <div class="island-footer" id="islandBar">
     <div style="display:flex; flex-direction:column;">
-        <span style="font-size:11px; opacity:0.6;">已选 <span id="tQ" style="color:var(--ios-orange);">0</span> 件</span>
+        <span style="font-size:11px; opacity:0.6;"><span id="ui-selected">已选</span> <span id="tQ" style="color:var(--ios-orange);">0</span> <span id="ui-items">件</span></span>
         <span style="font-size:19px; font-weight:900;">Ks <span id="tM">0</span></span>
     </div>
-    <button class="btn-go" onclick="showO()">确认下单</button>
+    <button class="btn-go" onclick="showO()" id="ui-confirm-btn">确认下单</button>
 </div>
 
 <div class="modal" id="mBox">
     <div class="modal-c">
         <div style="display:flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
             <div style="width: 30px;"></div>
-            <h2 style="font-size:18px; color: var(--ios-orange);">确认订单</h2>
+            <h2 style="font-size:18px; color: var(--ios-orange);" id="ui-modal-title">确认订单</h2>
             <button class="trash-btn" onclick="clearCart()" title="清空购物车">❌️</button>
         </div>
         <div id="oList" style="max-height: 350px; overflow-y: auto;"></div>
         <textarea id="note" placeholder="备注（如：加辣、不要蒜）"></textarea>
         <div style="display:flex; gap:10px;">
-            <button onclick="document.getElementById('mBox').style.display='none'" style="flex:1; padding:12px; border:none; background:#2c2c2e; color:#fff; border-radius:15px; font-weight:600;">取消</button>
-            <button onclick="copyO()" style="flex:1; padding:12px; border:none; background:var(--ios-orange); color:white; border-radius:15px; font-weight:600;">发送订单</button>
+            <button onclick="document.getElementById('mBox').style.display='none'" style="flex:1; padding:12px; border:none; background:#2c2c2e; color:#fff; border-radius:15px; font-weight:600;" id="ui-cancel">取消</button>
+            <button onclick="copyO()" style="flex:1; padding:12px; border:none; background:var(--ios-orange); color:white; border-radius:15px; font-weight:600;" id="ui-send">发送订单</button>
         </div>
     </div>
 </div>
@@ -127,6 +143,60 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
+    // --- 多语言配置 ---
+    const i18n = {
+        zh: {
+            selected: "已选",
+            items: "件",
+            confirmBtn: "确认下单",
+            modalTitle: "确认订单",
+            notePh: "备注（如：加辣、不要蒜）",
+            cancel: "取消",
+            send: "发送订单",
+            clearConfirm: "确定要清空购物车吗？",
+            orderHeader: "🔥 夜夜烤订单",
+            orderNote: "备注",
+            orderTotal: "总计",
+            copyAlert: "系统暂不支持直接分享，已为您自动复制订单内容！请去聊天窗口粘贴。",
+            errorAlert: "下单失败，请手动截图或联系老板。"
+        },
+        my: {
+            selected: "ရွေးချယ်ပြီး",
+            items: "ခု",
+            confirmBtn: "အော်ဒါတင်မည်",
+            modalTitle: "အော်ဒါစစ်ဆေးရန်",
+            notePh: "မှတ်ချက် (ဥပမာ-အစပ်လျှော့၊ ကြက်သွန်ဖြူမထည့်ပါနှင့်)",
+            cancel: "ပယ်ဖျက်မည်",
+            send: "ပို့မည်",
+            clearConfirm: "ဈေးခြင်းတောင်းကို ဖျက်မှာ သေချာပါသလား?",
+            orderHeader: "🔥 Ye Ye Kao Order",
+            orderNote: "မှတ်ချက်",
+            orderTotal: "စုစုပေါင်း",
+            copyAlert: "တိုက်ရိုက် Share လို့မရသေးပါ၊ စာသားကို Copy ကူးပေးထားပါသည်။ Message တွင် Paste လုပ်ပြီး ပို့ပေးပါ။",
+            errorAlert: "မအောင်မြင်ပါ၊ Screenshot ရိုက်ပြီး ဆိုင်ရှင်ကို ပို့ပေးပါ။"
+        }
+    };
+
+    window.curLang = localStorage.getItem('yeyekao_lang') || 'zh';
+
+    window.toggleLang = () => {
+        window.curLang = window.curLang === 'zh' ? 'my' : 'zh';
+        localStorage.setItem('yeyekao_lang', window.curLang);
+        applyLang();
+    };
+
+    function applyLang() {
+        const t = i18n[window.curLang];
+        document.getElementById('ui-selected').innerText = t.selected;
+        document.getElementById('ui-items').innerText = t.items;
+        document.getElementById('ui-confirm-btn').innerText = t.confirmBtn;
+        document.getElementById('ui-modal-title').innerText = t.modalTitle;
+        document.getElementById('note').placeholder = t.notePh;
+        document.getElementById('ui-cancel').innerText = t.cancel;
+        document.getElementById('ui-send').innerText = t.send;
+    }
+
+    // --- 原有逻辑还原 ---
     window.menu = []; window.banners = []; window.cart = {};
 
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -164,6 +234,7 @@
             window.menu = data.menu_data || []; window.banners = data.banners || [];
             const localData = localStorage.getItem('yeyekao_cart');
             if(localData) window.cart = JSON.parse(localData);
+            applyLang(); // 初始化语言
             renderB(); 
             renderM();
             updateGlobalUI();
@@ -187,7 +258,6 @@
         
         let html = '';
         cats.forEach(c => {
-            // 已移除图标，使用纯长条文字标题
             html += `<div class="cat-h" id="cat-${c}">${c}</div><div class="grid">`;
             window.menu.filter(i => i.category === c).forEach(item => {
                 const count = window.cart[item.id] || 0;
@@ -222,7 +292,15 @@
         totalQ > 0 ? island.classList.add('active') : island.classList.remove('active');
     }
 
-    window.clearCart = () => { if(confirm("确定要清空购物车吗？")) { window.cart = {}; localStorage.removeItem('yeyekao_cart'); renderM(); window.updateGlobalUI(); document.getElementById('mBox').style.display = 'none'; } };
+    window.clearCart = () => { 
+        if(confirm(i18n[window.curLang].clearConfirm)) { 
+            window.cart = {}; 
+            localStorage.removeItem('yeyekao_cart'); 
+            renderM(); 
+            window.updateGlobalUI(); 
+            document.getElementById('mBox').style.display = 'none'; 
+        } 
+    };
 
     window.upQ = (id, d) => {
         window.playClickSound(); 
@@ -250,7 +328,8 @@
     };
 
     window.copyO = async () => {
-        let txt = "🔥 夜夜烤订单\n----------\n";
+        const t = i18n[window.curLang];
+        let txt = `${t.orderHeader}\n----------\n`;
         let total = 0;
         for(let id in window.cart) {
             const i = window.menu.find(x => x.id == id);
@@ -259,7 +338,7 @@
                 total += i.price * window.cart[id];
             }
         }
-        txt += `----------\n备注: ${document.getElementById('note').value || '无'}\n总计: ${total} Ks`;
+        txt += `----------\n${t.orderNote}: ${document.getElementById('note').value || '-'}\n${t.orderTotal}: ${total} Ks`;
 
         if (navigator.share) {
             try {
@@ -273,10 +352,11 @@
     };
 
     function fallbackCopy(text) {
+        const t = i18n[window.curLang];
         navigator.clipboard.writeText(text).then(() => {
-            alert("系统暂不支持直接分享，已为您自动复制订单内容！请去聊天窗口粘贴。");
+            alert(t.copyAlert);
         }).catch(err => {
-            alert("下单失败，请手动截图或联系老板。");
+            alert(t.errorAlert);
         });
     }
 </script>
