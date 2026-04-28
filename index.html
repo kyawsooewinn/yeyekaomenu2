@@ -323,12 +323,16 @@
         txt += `----------\n${t.orderNote}: ${document.getElementById('note').value || '-'}\n${t.orderTotal}: ${total} Ks`;
 
         try {
+            // 后台静默复制文字，不再使用 alert 弹窗
             await navigator.clipboard.writeText(txt);
+            
+            // 根据选择直接跳转 App
             if(type === 'wechat') { window.location.href = "weixin://"; } 
             else if(type === 'viber') { window.location.href = "viber://forward?text=" + encodeURIComponent(txt); } 
             else if(type === 'telegram') { window.location.href = "tg://msg?text=" + encodeURIComponent(txt); }
             else if(type === 'sms') { window.location.href = "sms:?body=" + encodeURIComponent(txt); }
         } catch (err) {
+            // 只有在浏览器完全禁止复制时才会报错提示
             alert(t.errorAlert);
         }
         closeShareSheet();
