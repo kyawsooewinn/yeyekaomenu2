@@ -53,18 +53,12 @@
         .container { padding: 0 10px; }
 
         .cat-h { 
-            display: flex;
-            align-items: center;
-            font-size: 15px; 
-            font-weight: 700; 
-            margin: 20px -10px 15px -10px;
-            padding: 10px 20px; 
-            background: #1c1c1e; 
-            color: #fff;
+            display: flex; align-items: center; font-size: 15px; font-weight: 700; 
+            margin: 20px -10px 15px -10px; padding: 10px 20px; 
+            background: #1c1c1e; color: #fff;
             border-left: 4px solid var(--ios-orange); 
             border-bottom: 0.5px solid rgba(255,255,255,0.05);
-            letter-spacing: 1px;
-            text-transform: uppercase;
+            letter-spacing: 1px; text-transform: uppercase;
         }
 
         .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
@@ -94,13 +88,13 @@
         .trash-btn { background: transparent; border: none; color: #8e8e93; font-size: 20px; cursor: pointer; padding: 5px; }
         .trash-btn:active { color: var(--ios-orange); }
 
-        /* 新增：分享菜单样式 */
         .share-sheet { position: fixed; bottom: 0; left: 0; width: 100%; background: #1c1c1e; border-radius: 25px 25px 0 0; padding: 25px 20px calc(25px + env(safe-area-inset-bottom)); z-index: 3000; transform: translateY(100%); transition: transform 0.3s cubic-bezier(0.25, 0.1, 0.25, 1); box-shadow: 0 -10px 30px rgba(0,0,0,0.5); }
         .share-sheet.show { transform: translateY(0); }
-        .share-grid { display: flex; justify-content: space-around; gap: 15px; margin-top: 20px; }
-        .share-item { display: flex; flex-direction: column; align-items: center; gap: 8px; border: none; background: transparent; color: white; width: 80px; }
-        .share-icon { width: 60px; height: 60px; border-radius: 18px; display: flex; align-items: center; justify-content: center; font-size: 30px; color: white; }
-        .share-text { font-size: 12px; font-weight: 500; }
+        .share-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 20px; }
+        .share-item { display: flex; flex-direction: column; align-items: center; gap: 8px; border: none; background: transparent; color: white; }
+        .share-icon { width: 55px; height: 55px; border-radius: 12px; overflow: hidden; display: flex; align-items: center; justify-content: center; background: #2c2c2e; }
+        .share-icon img { width: 100%; height: 100%; object-fit: cover; }
+        .share-text { font-size: 11px; font-weight: 500; opacity: 0.9; white-space: nowrap; }
         .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 2900; }
     </style>
 </head>
@@ -143,15 +137,19 @@
     <h3 style="text-align:center; font-size:15px; opacity:0.8;" id="ui-share-title">选择发送方式</h3>
     <div class="share-grid">
         <button class="share-item" onclick="handleSend('wechat')">
-            <div class="share-icon" style="background:#07C160;">💬</div>
+            <div class="share-icon"><img src="wechat.jpg" alt="Wechat"></div>
             <span class="share-text">微信</span>
         </button>
         <button class="share-item" onclick="handleSend('viber')">
-            <div class="share-icon" style="background:#7360f2;">🟣</div>
+            <div class="share-icon"><img src="viber.jpg" alt="Viber"></div>
             <span class="share-text">Viber</span>
         </button>
+        <button class="share-item" onclick="handleSend('telegram')">
+            <div class="share-icon"><img src="telegram.jpg" alt="Telegram"></div>
+            <span class="share-text">Telegram</span>
+        </button>
         <button class="share-item" onclick="handleSend('sms')">
-            <div class="share-icon" style="background:#2ecc71;">✉️</div>
+            <div class="share-icon"><img src="sms.jpg" alt="SMS"></div>
             <span class="share-text">短信</span>
         </button>
     </div>
@@ -176,35 +174,17 @@
 
     const i18n = {
         zh: {
-            selected: "已选",
-            items: "件",
-            confirmBtn: "确认下单",
-            modalTitle: "确认订单",
-            notePh: "备注（如：加辣、不要蒜）",
-            cancel: "取消",
-            send: "发送订单",
-            clearConfirm: "确定要清空购物车吗？",
-            orderHeader: "🔥 夜夜烤订单",
-            orderNote: "备注",
-            orderTotal: "总计",
-            shareTitle: "选择发送应用",
-            copyAlert: "订单已自动复制！请去应用中粘贴发送。",
-            errorAlert: "复制失败，请尝试截图。"
+            selected: "已选", items: "件", confirmBtn: "确认下单", modalTitle: "确认订单",
+            notePh: "备注（如：加辣、不要蒜）", cancel: "取消", send: "发送订单",
+            clearConfirm: "确定要清空购物车吗？", orderHeader: "🔥 夜夜烤订单",
+            orderNote: "备注", orderTotal: "总计", shareTitle: "选择发送应用",
+            errorAlert: "复制失败，请截图。"
         },
         my: {
-            selected: "ရွေးချယ်ပြီး",
-            items: "ခု",
-            confirmBtn: "ORDERတင်မည်",
-            modalTitle: "ORDERစစ်ဆေးရန်",
-            notePh: "မှတ်ချက် (ဥပမာ-အစပ်လျှော့)",
-            cancel: "ပယ်ဖျက်မည်",
-            send: "ပို့မည်",
-            clearConfirm: "Order များဖျက်မှာ သေချာပါသလား?",
-            orderHeader: "🔥 Ye Ye Kao Order",
-            orderNote: "မှတ်ချက်",
-            orderTotal: "စုစုပေါင်း",
-            shareTitle: "ပို့မည့် App ကိုရွေးပါ",
-            copyAlert: "Order ကို Copy ကူးပြီးပါပြီ။ App တွင် Paste လုပ်ပေးပါ။",
+            selected: "ရွေးချယ်ပြီး", items: "ခု", confirmBtn: "ORDERတင်မည်", modalTitle: "ORDERစစ်ဆေးရန်",
+            notePh: "မှတ်ချက် (ဥပမာ-အစပ်လျှော့)", cancel: "ပယ်ဖျက်မည်", send: "ပို့မည်",
+            clearConfirm: "Order များဖျက်မှာ သေချာပါသလား?", orderHeader: "🔥 Ye Ye Kao Order",
+            orderNote: "မှတ်ချက်", orderTotal: "စုစုပေါင်း", shareTitle: "ပို့မည့် App ကိုရွေးပါ",
             errorAlert: "မအောင်မြင်ပါ၊ Screenshot ရိုက်ပို့ပေးပါ။"
         }
     };
@@ -241,42 +221,30 @@
         osc.start(); osc.stop(audioCtx.currentTime + 0.1);
     };
 
-    let bannerInterval = null;
-    let currentIdx = 0;
+    let bannerInterval = null; let currentIdx = 0;
     function startAutoScroll() {
         if(bannerInterval) clearInterval(bannerInterval);
         bannerInterval = setInterval(() => {
-            const wrap = document.getElementById('bWrap');
-            if(!wrap) return;
+            const wrap = document.getElementById('bWrap'); if(!wrap) return;
             const slides = wrap.children.length;
-            if (slides > 1) {
-                currentIdx = (currentIdx + 1) % slides;
-                const slideWidth = wrap.offsetWidth;
-                wrap.scrollTo({ left: currentIdx * slideWidth, behavior: 'smooth' });
-            }
+            if (slides > 1) { currentIdx = (currentIdx + 1) % slides; wrap.scrollTo({ left: currentIdx * wrap.offsetWidth, behavior: 'smooth' }); }
         }, 3000);
     }
 
     onSnapshot(doc(db, "restaurant", "data"), (docSnap) => {
         if (docSnap.exists()) {
-            const data = docSnap.data();
-            window.menu = data.menu_data || []; window.banners = data.banners || [];
-            const localData = localStorage.getItem('yeyekao_cart');
-            if(localData) window.cart = JSON.parse(localData);
-            applyLang();
-            renderB(); renderM();
-            updateGlobalUI();
+            const data = docSnap.data(); window.menu = data.menu_data || []; window.banners = data.banners || [];
+            const localData = localStorage.getItem('yeyekao_cart'); if(localData) window.cart = JSON.parse(localData);
+            applyLang(); renderB(); renderM(); updateGlobalUI();
             document.getElementById('p-bar').style.width = '100%';
             setTimeout(() => { document.getElementById('p-bar-wrap').style.display='none'; }, 500);
         }
     });
 
     function renderB() {
-        const wrap = document.getElementById('bWrap');
-        if(!window.banners.length) return;
+        const wrap = document.getElementById('bWrap'); if(!window.banners.length) return;
         wrap.innerHTML = window.banners.map(u => `<div class="b-slide"><img src="${u}"></div>`).join('');
-        currentIdx = 0; wrap.scrollLeft = 0;
-        if (window.banners.length > 1) startAutoScroll();
+        currentIdx = 0; wrap.scrollLeft = 0; if (window.banners.length > 1) startAutoScroll();
     }
 
     function renderM() {
@@ -300,15 +268,12 @@
             const i = window.menu.find(x => x.id == k);
             if(i) { totalQ += window.cart[k]; totalM += window.cart[k] * i.price; }
         }
-        document.getElementById('tQ').innerText = totalQ;
-        document.getElementById('tM').innerText = totalM;
-        const island = document.getElementById('islandBar');
-        totalQ > 0 ? island.classList.add('active') : island.classList.remove('active');
+        document.getElementById('tQ').innerText = totalQ; document.getElementById('tM').innerText = totalM;
+        const island = document.getElementById('islandBar'); totalQ > 0 ? island.classList.add('active') : island.classList.remove('active');
     }
 
     window.upQ = (id, d) => {
-        window.playClickSound(); 
-        window.cart[id] = Math.max(0, (window.cart[id] || 0) + d);
+        window.playClickSound(); window.cart[id] = Math.max(0, (window.cart[id] || 0) + d);
         if(window.cart[id] === 0) delete window.cart[id];
         localStorage.setItem('yeyekao_cart', JSON.stringify(window.cart));
         const count = window.cart[id] || 0;
@@ -320,13 +285,11 @@
     window.showO = () => {
         let html = '';
         for(let id in window.cart) {
-            const i = window.menu.find(x => x.id == id);
-            if(!i) continue;
+            const i = window.menu.find(x => x.id == id); if(!i) continue;
             html += `<div class="o-item"><img src="${i.img}" class="o-img"><div style="flex:1"><div style="font-size:14px; font-weight:600;">${i.name}</div><div style="color:var(--ios-orange); font-size:13px;">Ks ${i.price * window.cart[id]}</div></div><div style="display:flex; align-items:center; gap:14px;"><button class="btn-s" onclick="window.upQ('${i.id}',-1); window.showO();">－</button><span style="font-weight:bold; min-width:24px; text-align:center;">${window.cart[id]}</span><button class="btn-s" onclick="window.upQ('${i.id}',1); window.showO();">＋</button></div></div>`;
         }
         if(Object.keys(window.cart).length === 0) { document.getElementById('mBox').style.display = 'none'; return; }
-        document.getElementById('oList').innerHTML = html;
-        document.getElementById('mBox').style.display = 'block';
+        document.getElementById('oList').innerHTML = html; document.getElementById('mBox').style.display = 'block';
     };
 
     window.clearCart = () => { 
@@ -336,7 +299,6 @@
         } 
     };
 
-    // --- 核心分享逻辑 ---
     window.openShareSheet = () => {
         document.getElementById('overlay').style.display = 'block';
         document.getElementById('shareSheet').classList.add('show');
@@ -356,26 +318,3 @@
             if(i) {
                 txt += `${i.name} x ${window.cart[id]} = ${i.price * window.cart[id]} Ks\n`;
                 total += i.price * window.cart[id];
-            }
-        }
-        txt += `----------\n${t.orderNote}: ${document.getElementById('note').value || '-'}\n${t.orderTotal}: ${total} Ks`;
-
-        try {
-            await navigator.clipboard.writeText(txt);
-            alert(t.copyAlert);
-            
-            if(type === 'wechat') {
-                window.location.href = "weixin://";
-            } else if(type === 'viber') {
-                window.location.href = "viber://forward?text=" + encodeURIComponent(txt);
-            } else if(type === 'sms') {
-                window.location.href = "sms:?body=" + encodeURIComponent(txt);
-            }
-        } catch (err) {
-            alert(t.errorAlert);
-        }
-        closeShareSheet();
-    };
-</script>
-</body>
-</html>
