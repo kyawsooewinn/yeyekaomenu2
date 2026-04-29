@@ -22,7 +22,7 @@
             color: #ffffff;
         }
 
-        /* --- 悬浮按钮：固定在右上角 --- */
+        /* --- 悬浮按钮 --- */
         .fab-container { position: fixed; right: 20px; top: 60px; z-index: 3100; display: flex; flex-direction: column; align-items: flex-end; gap: 12px; }
         .fab-main { width: 50px; height: 50px; background: var(--ios-orange); border-radius: 50%; box-shadow: 0 4px 15px rgba(255,69,0,0.4); display: flex; align-items: center; justify-content: center; font-size: 26px; border: none; color: white; transition: 0.3s; }
         .fab-menu { display: none; flex-direction: column; gap: 10px; animation: fabSlideDown 0.3s forwards; }
@@ -36,14 +36,14 @@
         .qr-card img { width: 100%; height: auto; border-radius: 10px; }
         .qr-tip { color: #333; font-size: 13px; margin-top: 10px; font-weight: 700; }
 
-        /* --- 订单详情弹窗：已挪位，避免重叠 --- */
+        /* --- 弹窗 --- */
         .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); z-index: 2000; padding: 20px; overflow-y: auto; }
         .modal-c { 
             background: #1c1c1e; 
             border-radius: 24px; 
             padding: 20px; 
             max-width: 500px; 
-            margin: 100px auto 40px auto; /* 顶部距离增加到 100px 避开按钮 */
+            margin: 100px auto 40px auto;
             border: 0.5px solid rgba(255,255,255,0.1); 
             position: relative;
         }
@@ -86,7 +86,8 @@
         .o-item { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 0.5px solid rgba(255,255,255,0.05); }
         .o-img { width: 50px; height: 50px; border-radius: 10px; object-fit: cover; }
         .btn-s { width: 34px; height: 34px; border-radius: 50%; border: none; background: rgba(255,255,255,0.15); color: white; font-size: 20px; display: flex; align-items: center; justify-content: center; }
-        textarea#note { width:100%; padding:10px; margin:12px 0; border-radius:12px; border:none; background: #2c2c2e; color: white; font-size:16px; min-height: 60px; }
+        textarea#note { width:100%; padding:10px; margin:12px 0 5px 0; border-radius:12px; border:none; background: #2c2c2e; color: white; font-size:16px; min-height: 60px; }
+        .modal-summary { display: flex; justify-content: space-between; padding: 10px 5px; margin-bottom: 15px; border-top: 0.5px solid rgba(255,255,255,0.1); }
         .trash-btn { background: transparent; border: none; color: #8e8e93; font-size: 20px; cursor: pointer; padding: 5px; }
 
         .share-sheet { position: fixed; bottom: 0; left: 0; width: 100%; background: #1c1c1e; border-radius: 25px 25px 0 0; padding: 25px 20px calc(25px + env(safe-area-inset-bottom)); z-index: 3000; transform: translateY(100%); transition: transform 0.3s cubic-bezier(0.25, 0.1, 0.25, 1); }
@@ -132,7 +133,7 @@
 </div>
 
 <div class="modal" id="mBox">
-    <div class="modal-c">
+    <div class="modal-c" onclick="event.stopPropagation()">
         <div style="display:flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
             <div style="width: 30px;"></div>
             <h2 style="font-size:18px; color: var(--ios-orange);" id="ui-modal-title">确认订单</h2>
@@ -140,6 +141,12 @@
         </div>
         <div id="oList" style="max-height: 350px; overflow-y: auto;"></div>
         <textarea id="note" placeholder="备注（如：加辣、不要蒜）"></textarea>
+        
+        <div class="modal-summary">
+            <span style="font-size:14px; opacity:0.8;"><span id="ui-m-selected">已选</span> <span id="m-tQ" style="color:var(--ios-orange); font-weight:bold;">0</span> <span id="ui-m-items">件</span></span>
+            <span style="font-size:16px; font-weight:900;">Ks <span id="m-tM">0</span></span>
+        </div>
+
         <div style="display:flex; gap:10px;">
             <button onclick="document.getElementById('mBox').style.display='none'" style="flex:1; padding:12px; border:none; background:#2c2c2e; color:#fff; border-radius:15px; font-weight:600;" id="ui-cancel">取消</button>
             <button onclick="openShareSheet()" style="flex:1; padding:12px; border:none; background:var(--ios-orange); color:white; border-radius:15px; font-weight:600;" id="ui-send">发送订单</button>
@@ -235,6 +242,9 @@
         document.getElementById('ui-qr').innerText = t.qr;
         document.getElementById('ui-qr-tip').innerText = t.qrTip;
         document.getElementById('ui-lang-text').innerText = t.langText;
+        // 弹窗内的多语言
+        document.getElementById('ui-m-selected').innerText = t.selected;
+        document.getElementById('ui-m-items').innerText = t.items;
     }
 
     window.menu = []; window.cart = {};
@@ -300,13 +310,29 @@
 
     window.showO = () => {
         let html = '';
+        let totalQ = 0, totalM = 0;
         for(let id in window.cart) {
             const i = window.menu.find(x => x.id == id); if(!i) continue;
-            html += `<div class="o-item"><img src="${i.img}" class="o-img"><div style="flex:1"><div style="font-size:14px; font-weight:600;">${i.name}</div><div style="color:var(--ios-orange); font-size:13px;">Ks ${i.price * window.cart[id]}</div></div><div style="display:flex; align-items:center; gap:14px;"><button class="btn-s" onclick="window.upQ('${i.id}',-1); window.showO();">－</button><span style="font-weight:bold; min-width:24px; text-align:center;">${window.cart[id]}</span><button class="btn-s" onclick="window.upQ('${i.id}',1); window.showO();">＋</button></div></div>`;
+            const subtotal = i.price * window.cart[id];
+            totalQ += window.cart[id];
+            totalM += subtotal;
+            html += `<div class="o-item"><img src="${i.img}" class="o-img"><div style="flex:1"><div style="font-size:14px; font-weight:600;">${i.name}</div><div style="color:var(--ios-orange); font-size:13px;">Ks ${subtotal}</div></div><div style="display:flex; align-items:center; gap:14px;"><button class="btn-s" onclick="window.upQ('${i.id}',-1); window.showO();">－</button><span style="font-weight:bold; min-width:24px; text-align:center;">${window.cart[id]}</span><button class="btn-s" onclick="window.upQ('${i.id}',1); window.showO();">＋</button></div></div>`;
         }
         if(Object.keys(window.cart).length === 0) { document.getElementById('mBox').style.display = 'none'; return; }
-        document.getElementById('oList').innerHTML = html; document.getElementById('mBox').style.display = 'block';
+        
+        document.getElementById('oList').innerHTML = html;
+        // 更新弹窗内的汇总信息
+        document.getElementById('m-tQ').innerText = totalQ;
+        document.getElementById('m-tM').innerText = totalM;
+        document.getElementById('mBox').style.display = 'block';
     };
+
+    // 点击背景关闭弹窗
+    document.getElementById('mBox').addEventListener('click', function(e) {
+        if (e.target === this) {
+            this.style.display = 'none';
+        }
+    });
 
     window.clearCart = () => { 
         if(confirm(i18n[window.curLang].clearConfirm)) { 
