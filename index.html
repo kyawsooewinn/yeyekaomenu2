@@ -88,7 +88,8 @@
         .btn-s { width: 34px; height: 34px; border-radius: 50%; border: none; background: rgba(255,255,255,0.15); color: white; font-size: 20px; display: flex; align-items: center; justify-content: center; }
         textarea#note { width:100%; padding:10px; margin:12px 0 5px 0; border-radius:12px; border:none; background: #2c2c2e; color: white; font-size:16px; min-height: 60px; }
         .modal-summary { display: flex; justify-content: space-between; padding: 10px 5px; margin-bottom: 15px; border-top: 0.5px solid rgba(255,255,255,0.1); }
-        .trash-btn { background: transparent; border: none; color: #8e8e93; font-size: 20px; cursor: pointer; padding: 5px; }
+        /* 修改清空按钮样式 */
+        .clear-btn { background: transparent; border: none; color: #ff3b30; font-size: 13px; font-weight: 600; cursor: pointer; padding: 5px 10px; border-radius: 10px; border: 0.5px solid rgba(255,59,48,0.3); }
 
         .share-sheet { position: fixed; bottom: 0; left: 0; width: 100%; background: #1c1c1e; border-radius: 25px 25px 0 0; padding: 25px 20px calc(25px + env(safe-area-inset-bottom)); z-index: 3000; transform: translateY(100%); transition: transform 0.3s cubic-bezier(0.25, 0.1, 0.25, 1); }
         .share-sheet.show { transform: translateY(0); }
@@ -135,9 +136,9 @@
 <div class="modal" id="mBox">
     <div class="modal-c" onclick="event.stopPropagation()">
         <div style="display:flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-            <div style="width: 30px;"></div>
+            <div style="width: 50px;"></div>
             <h2 style="font-size:18px; color: var(--ios-orange);" id="ui-modal-title">确认订单</h2>
-            <button class="trash-btn" onclick="clearCart()" title="清空购物车">❌️</button>
+            <button class="clear-btn" onclick="clearCart()" id="ui-clear-btn">清空</button>
         </div>
         <div id="oList" style="max-height: 350px; overflow-y: auto;"></div>
         <textarea id="note" placeholder="备注（如：加辣、不要蒜）"></textarea>
@@ -148,7 +149,7 @@
         </div>
 
         <div style="display:flex; gap:10px;">
-            <button onclick="document.getElementById('mBox').style.display='none'" style="flex:1; padding:12px; border:none; background:#2c2c2e; color:#fff; border-radius:15px; font-weight:600;" id="ui-cancel">取消</button>
+            <button onclick="document.getElementById('mBox').style.display='none'" style="flex:1; padding:12px; border:none; background:#2c2c2e; color:#fff; border-radius:15px; font-weight:600;" id="ui-cancel">返回修改</button>
             <button onclick="openShareSheet()" style="flex:1; padding:12px; border:none; background:var(--ios-orange); color:white; border-radius:15px; font-weight:600;" id="ui-send">发送订单</button>
         </div>
     </div>
@@ -187,8 +188,8 @@
     const i18n = {
         zh: {
             selected: "已选", items: "件", confirmBtn: "确认下单", modalTitle: "确认订单",
-            notePh: "备注（如：加辣、不要蒜）", cancel: "取消", send: "发送订单",
-            clearConfirm: "确定要清空购物车吗？", orderHeader: "🔥 夜夜烤订单",
+            notePh: "备注（如：加辣、不要蒜）", cancel: "返回修改", send: "发送订单",
+            clearBtn: "清空", clearConfirm: "确定要清空购物车吗？", orderHeader: "🔥 夜夜烤订单",
             orderNote: "备注", orderTotal: "总计", shareTitle: "选择发送应用",
             errorAlert: "复制失败，请截图。", copySuccess: "✅ 订单已复制！\n请粘贴发送给老板",
             wechatHint: "✅ 订单已复制！\n请点击左上角“返回”按钮，在聊天框粘贴发送。",
@@ -196,8 +197,8 @@
         },
         my: {
             selected: "ရွေးချယ်ပြီး", items: "ခု", confirmBtn: "ORDERတင်မည်", modalTitle: "ORDERစစ်ဆေးရန်",
-            notePh: "မှတ်ချက် (ဥပမာ-အစပ်လျှော့)", cancel: "ပယ်ဖျက်မည်", send: "ပို့မည်",
-            clearConfirm: "Order များဖျက်မှာ သေချာပါသလား?", orderHeader: "🔥 Ye Ye Kao Order",
+            notePh: "မှတ်ချက် (ဥပမာ-အစပ်လျှော့)", cancel: "ပြန်ပြင်မည်", send: "ပို့မည်",
+            clearBtn: "Clear", clearConfirm: "Order များဖျက်မှာ သေချာပါသလား?", orderHeader: "🔥 Ye Ye Kao Order",
             orderNote: "မှတ်ချက်", orderTotal: "စုစုပေါင်း", shareTitle: "ပို့မည့် App ကိုရွေးပါ",
             errorAlert: "မအောင်မြင်ပါ，Screenshot ရိုက်ပို့ပေးပါ။", copySuccess: "✅ Order Copy ကူးပြီးပါပြီ",
             wechatHint: "✅ Order Copied!\nPlease go back to chat and paste.",
@@ -242,9 +243,9 @@
         document.getElementById('ui-qr').innerText = t.qr;
         document.getElementById('ui-qr-tip').innerText = t.qrTip;
         document.getElementById('ui-lang-text').innerText = t.langText;
-        // 弹窗内的多语言
         document.getElementById('ui-m-selected').innerText = t.selected;
         document.getElementById('ui-m-items').innerText = t.items;
+        document.getElementById('ui-clear-btn').innerText = t.clearBtn;
     }
 
     window.menu = []; window.cart = {};
@@ -314,25 +315,17 @@
         for(let id in window.cart) {
             const i = window.menu.find(x => x.id == id); if(!i) continue;
             const subtotal = i.price * window.cart[id];
-            totalQ += window.cart[id];
-            totalM += subtotal;
+            totalQ += window.cart[id]; totalM += subtotal;
             html += `<div class="o-item"><img src="${i.img}" class="o-img"><div style="flex:1"><div style="font-size:14px; font-weight:600;">${i.name}</div><div style="color:var(--ios-orange); font-size:13px;">Ks ${subtotal}</div></div><div style="display:flex; align-items:center; gap:14px;"><button class="btn-s" onclick="window.upQ('${i.id}',-1); window.showO();">－</button><span style="font-weight:bold; min-width:24px; text-align:center;">${window.cart[id]}</span><button class="btn-s" onclick="window.upQ('${i.id}',1); window.showO();">＋</button></div></div>`;
         }
         if(Object.keys(window.cart).length === 0) { document.getElementById('mBox').style.display = 'none'; return; }
-        
         document.getElementById('oList').innerHTML = html;
-        // 更新弹窗内的汇总信息
         document.getElementById('m-tQ').innerText = totalQ;
         document.getElementById('m-tM').innerText = totalM;
         document.getElementById('mBox').style.display = 'block';
     };
 
-    // 点击背景关闭弹窗
-    document.getElementById('mBox').addEventListener('click', function(e) {
-        if (e.target === this) {
-            this.style.display = 'none';
-        }
-    });
+    document.getElementById('mBox').addEventListener('click', function(e) { if (e.target === this) this.style.display = 'none'; });
 
     window.clearCart = () => { 
         if(confirm(i18n[window.curLang].clearConfirm)) { 
