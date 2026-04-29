@@ -97,10 +97,9 @@
         .share-text { font-size: 11px; font-weight: 500; opacity: 0.9; white-space: nowrap; }
         .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 2900; }
         
-        /* 新增：自动消失提示框的样式 */
         #toast {
             display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); 
-            background: rgba(30, 30, 30, 0.9); color: white; padding: 16px 28px; border-radius: 20px; 
+            background: rgba(30, 30, 30, 0.95); color: white; padding: 16px 28px; border-radius: 20px; 
             z-index: 4000; backdrop-filter: blur(15px); font-weight: 600; text-align: center;
             border: 0.5px solid rgba(255,255,255,0.2); box-shadow: 0 10px 30px rgba(0,0,0,0.5);
         }
@@ -188,14 +187,16 @@
             notePh: "备注（如：加辣、不要蒜）", cancel: "取消", send: "发送订单",
             clearConfirm: "确定要清空购物车吗？", orderHeader: "🔥 夜夜烤订单",
             orderNote: "备注", orderTotal: "总计", shareTitle: "选择发送应用",
-            errorAlert: "复制失败，请截图。", copySuccess: "✅ 订单已复制，请发送给老板"
+            errorAlert: "复制失败，请截图。", copySuccess: "✅ 订单已复制！\n请粘贴发送给老板",
+            wechatHint: "✅ 订单已复制！\n请点击左上角“返回”按钮，在聊天框粘贴发送。"
         },
         my: {
             selected: "ရွေးချယ်ပြီး", items: "ခု", confirmBtn: "ORDERတင်မည်", modalTitle: "ORDERစစ်ဆေးရန်",
             notePh: "မှတ်ချက် (ဥပမာ-အစပ်လျှော့)", cancel: "ပယ်ဖျက်မည်", send: "ပို့မည်",
             clearConfirm: "Order များဖျက်မှာ သေချာပါသလား?", orderHeader: "🔥 Ye Ye Kao Order",
             orderNote: "မှတ်ချက်", orderTotal: "စုစုပေါင်း", shareTitle: "ပို့မည့် App ကိုရွေးပါ",
-            errorAlert: "မအောင်မြင်ပါ၊ Screenshot ရိုက်ပို့ပေးပါ။", copySuccess: "✅ Order Copy ကူးပြီးပါပြီ"
+            errorAlert: "မအောင်မြင်ပါ၊ Screenshot ရိုက်ပို့ပေးပါ။", copySuccess: "✅ Order Copy ကူးပြီးပါပြီ",
+            wechatHint: "✅ Order Copied!\nPlease go back to chat and paste."
         }
     };
 
@@ -309,37 +310,19 @@
         } 
     };
 
-    // 新增：自动隐藏的提示功能
     window.showToast = (msg) => {
         const t = document.getElementById('toast');
         t.innerText = msg;
         t.style.display = 'block';
-        setTimeout(() => { t.style.display = 'none'; }, 1800);
+        // 修改：将 1500 延长至 2500 (即 2.5 秒)
+        setTimeout(() => { t.style.display = 'none'; }, 2500);
     };
 
-    // 修改：打开面板时立即复制并提示
     window.openShareSheet = async () => {
-        // 生成订单文本
         const t = i18n[window.curLang];
-        let txt = `${t.orderHeader}\n----------\n`;
-        let total = 0;
-        for(let id in window.cart) {
-            const i = window.menu.find(x => x.id == id);
-            if(i) {
-                txt += `${i.name} x ${window.cart[id]} = ${i.price * window.cart[id]} Ks\n`;
-                total += i.price * window.cart[id];
-            }
-        }
-        txt += `----------\n${t.orderNote}: ${document.getElementById('note').value || '-'}\n${t.orderTotal}: ${total} Ks`;
-
-        // 尝试复制并显示提示
-        try {
-            await navigator.clipboard.writeText(txt);
-            window.showToast(t.copySuccess);
-        } catch (e) { console.error("Copy failed"); }
-
         document.getElementById('overlay').style.display = 'block';
         document.getElementById('shareSheet').classList.add('show');
+        window.showToast(t.copySuccess);
     };
 
     window.closeShareSheet = () => {
@@ -362,14 +345,21 @@
 
         try {
             await navigator.clipboard.writeText(txt);
-            if(type === 'wechat') { window.location.href = "weixin://"; } 
-            else if(type === 'viber') { window.location.href = "viber://forward?text=" + encodeURIComponent(txt); } 
-            else if(type === 'telegram') { window.location.href = "tg://msg?text=" + encodeURIComponent(txt); }
-            else if(type === 'sms') { window.location.href = "sms:?body=" + encodeURIComponent(txt); }
+            const isWechat = /MicroMessenger/i.test(navigator.userAgent);
+            if (isWechat) {
+                alert(t.wechatHint);
+                closeShareSheet();
+            } else {
+                if(type === 'wechat') { window.location.href = "weixin://"; } 
+                else if(type === 'viber') { window.location.href = "viber://forward?text=" + encodeURIComponent(txt); } 
+                else if(type === 'telegram') { window.location.href = "tg://msg?text=" + encodeURIComponent(txt); }
+                else if(type === 'sms') { window.location.href = "sms:?body=" + encodeURIComponent(txt); }
+                closeShareSheet();
+            }
         } catch (err) {
-            alert(t.errorAlert);
+            alert(t.errorAlert + "\n\n" + txt);
+            closeShareSheet();
         }
-        closeShareSheet();
     };
 </script>
 </body>
